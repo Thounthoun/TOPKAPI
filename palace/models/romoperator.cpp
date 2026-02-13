@@ -208,7 +208,7 @@ void MinimalRationalInterpolation::AddSolutionSample(double omega, const Complex
   }
   OrthogonalizeColumn(orthog_type, comm, Q, Q[dim_Q], R.col(dim_Q).data(), dim_Q);
   R(dim_Q, dim_Q) = linalg::Norml2(comm, Q[dim_Q]);
-  if (R(dim_Q, dim_Q) <= ORTHOG_TOL)
+  if (std::abs(R(dim_Q, dim_Q)) <= ORTHOG_TOL)
   {
     // Skip linearly dependent snapshots to avoid division-by-zero and basis corruption.
     R.conservativeResize(dim_Q, dim_Q);
@@ -285,16 +285,18 @@ std::vector<double> MinimalRationalInterpolation::FindMaxError(int N) const
   // Fall back to sampling Q on discrete points if no roots exist in [start, end].
   if (std::abs(z_star[0]) == 0.0)
   {
-    const auto delta = (end - start) / 1.0e6;
+    const double start0 = start;
+    constexpr int n_samples = 1000000;
+    const auto delta = (end - start) / static_cast<double>(n_samples);
     MFEM_VERIFY(delta > 0.0,
                 "Could not sample parameter range to locate PROM maximum error!");
     std::vector<double> Q_star(N, mfem::infinity());
-    while (start <= end)
+    for (int i = 0; i <= n_samples; i++)
     {
-      const auto den = (z_map.array() - start);
+      const double freq = start0 + i * delta;
+      const auto den = (z_map.array() - freq);
       if ((den.abs() <= ORTHOG_TOL).any())
       {
-        start += delta;
         continue;
       }
       const double Q = std::abs((q.array() / den).sum());
@@ -307,15 +309,14 @@ std::vector<double> MinimalRationalInterpolation::FindMaxError(int N) const
             z_star[j] = z_star[j - 1];
             Q_star[j] = Q_star[j - 1];
           }
-          z_star[i] = start;
+          z_star[i] = freq;
           Q_star[i] = Q;
         }
       }
-      start += delta;
     }
     MFEM_VERIFY(
         N == 0 || std::abs(z_star[0]) > 0.0,
-        fmt::format("Could not locate a maximum error in the range [{}, {}]!", start, end));
+        fmt::format("Could not locate a maximum error in the range [{}, {}]!", start0, end));
   }
   std::vector<double> vals(z_star.size());
   std::transform(z_star.begin(), z_star.end(), vals.begin(),
@@ -404,14 +405,7 @@ void RomOperator::SolveHDM(int excitation_idx, double omega, ComplexVector &u)
 
   // The HDM excitation vector is computed as RHS = iω RHS1 + RHS2(ω).
   Mpi::Print("\n");
-  if (has_RHS2)
-  {
-    has_RHS2 = space_op.GetExcitationVector2(excitation_idx, omega, r);
-  }
-  else
-  {
-    r = 0.0;
-  }
+  has_RHS2 = space_op.GetExcitationVector2(excitation_idx, omega, r);
   if (has_RHS1)
   {
     r.Add(1i * omega, RHS1);
@@ -492,9 +486,10 @@ void RomOperator::SolvePROM(int excitation_idx, double omega, ComplexVector &u)
   // the matrix Aᵣ(ω) = Kᵣ + iω Cᵣ - ω² Mᵣ + Vᴴ A2 V(ω) and source vector RHSᵣ(ω) =
   // iω RHS1ᵣ + Vᴴ RHS2(ω). A2(ω) and RHS2(ω) are constructed only if required and are
   // only nonzero on boundaries, will be empty if not needed.
+  A2 = space_op.GetExtraSystemMatrix<ComplexOperator>(omega, Operator::DIAG_ZERO);
+  has_A2 = (A2 != nullptr);
   if (has_A2 && Ar.rows() > 0)
   {
-    A2 = space_op.GetExtraSystemMatrix<ComplexOperator>(omega, Operator::DIAG_ZERO);
     ProjectMatInternal(space_op.GetComm(), V, *A2, Ar, r, 0);
   }
   else
@@ -508,9 +503,9 @@ void RomOperator::SolvePROM(int excitation_idx, double omega, ComplexVector &u)
   }
   Ar += (-omega * omega) * Mr;
 
+  has_RHS2 = space_op.GetExcitationVector2(excitation_idx, omega, RHS2);
   if (has_RHS2 && RHSr.size() > 0)
   {
-    space_op.GetExcitationVector2(excitation_idx, omega, RHS2);
     ProjectVecInternal(space_op.GetComm(), V, RHS2, RHSr, 0);
   }
   else

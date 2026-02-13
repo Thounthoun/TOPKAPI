@@ -96,7 +96,7 @@ public:
   [[nodiscard]] int MaxIdx() const
   {
     // Map is stored order by key so max key is last item.
-    return excitations.empty() ? 0 : std::next(std::rend(excitations))->first;
+    return excitations.empty() ? 0 : excitations.rbegin()->first;
   }
   [[nodiscard]] auto Size() const { return excitations.size(); }
   [[nodiscard]] auto Empty() const { return excitations.empty(); }
