@@ -164,8 +164,9 @@ void SurfaceConductivityOperator::AddExtraSystemBdrCoefficients(
         double ratio_re, ratio_im;
         if (nu < 0.1)
         {
-          // Use a series expansion for small nu to avoid catastrophic cancellation in
-          // cosh(nu) - cos(nu) and sinh(nu) - sin(nu).
+          // Use series expansions for small nu to avoid cancellation in
+          // (sinh(nu) ± sin(nu)) / (cosh(nu) - cos(nu)).
+          // Leading terms are 2/nu for the real ratio and nu/3 for the imaginary ratio.
           const double nu2 = nu * nu;
           const double nu3 = nu2 * nu;
           const double nu4 = nu2 * nu2;
