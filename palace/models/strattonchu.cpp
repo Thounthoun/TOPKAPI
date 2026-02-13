@@ -68,98 +68,127 @@ void AddStrattonChuIntegrandAtElement(const GridFunction &E, const GridFunction 
   StaticVector<3> normal;
   StaticVector<3> n_cross_Er, n_cross_ZHr;
   StaticVector<3> n_cross_Ei, n_cross_ZHi;
+  double r_phys0 = 0.0, r_phys1 = 0.0, r_phys2 = 0.0;
+  double k_re = 0.0, k_im = 0.0;
+  double prefactor_re = 0.0, prefactor_im = 0.0;
+  double n_cross_Er0 = 0.0, n_cross_Er1 = 0.0, n_cross_Er2 = 0.0;
+  double n_cross_Ei0 = 0.0, n_cross_Ei1 = 0.0, n_cross_Ei2 = 0.0;
+  double n_cross_ZHr0 = 0.0, n_cross_ZHr1 = 0.0, n_cross_ZHr2 = 0.0;
+  double n_cross_ZHi0 = 0.0, n_cross_ZHi1 = 0.0, n_cross_ZHi2 = 0.0;
 
   const mfem::ParMesh *mesh = E.Real().ParFESpace()->GetParMesh();
   mfem::FaceElementTransformations FET;
   mfem::IsoparametricTransformation T1, T2;
 
-  for (int j = 0; j < ir.GetNPoints(); j++)
+  PalacePragmaOmp(parallel)
   {
-    const mfem::IntegrationPoint &ip = ir.IntPoint(j);
-    T.SetIntPoint(&ip);
-
-    MFEM_ASSERT(T.ElementType == mfem::ElementTransformation::BDR_ELEMENT,
-                "Unexpected element type in BdrSurfaceFluxCoefficient!");
-
-    bool invert = BdrGridFunctionCoefficient::GetBdrElementNeighborTransformations(
-        T.ElementNo, *mesh, FET, T1, T2, &ip);  // NOTE: this updates FET.
-    MFEM_VERIFY(!FET.Elem2,
-                "FarField computations are only supported on external boundaries.")
-
-    T.Transform(ip, r_phys);
-
-    // Evaluate E and B fields on this element.
-    E.Real().GetVectorValue(*FET.Elem1, FET.Elem1->GetIntPoint(), E_real);
-    E.Imag().GetVectorValue(*FET.Elem1, FET.Elem1->GetIntPoint(), E_imag);
-    B.Real().GetVectorValue(*FET.Elem1, FET.Elem1->GetIntPoint(), B_real);
-    B.Imag().GetVectorValue(*FET.Elem1, FET.Elem1->GetIntPoint(), B_imag);
-
-    // We assume that the material is isotropic, so the wave speed is a scalar.
-    double wave_speed = mat_op.GetLightSpeedMax(FET.Elem1->Attribute);
-    double k_re = omega_re / wave_speed;
-    double k_im = omega_im / wave_speed;
-    double quadrature_weight = ip.weight * T.Weight();
-
-    // Complex prefactor: (ik/4π) = (i(k_re + ik_im)/4π) = (ik_re - k_im)/4π.
-    double prefactor_re = -quadrature_weight * k_im / (4 * M_PI);
-    double prefactor_im = quadrature_weight * k_re / (4 * M_PI);
-
-    // Z * H = c0 * B.
-    mat_op.GetLightSpeed(FET.Elem1->Attribute).Mult(B_real, ZH_real);
-    mat_op.GetLightSpeed(FET.Elem1->Attribute).Mult(B_imag, ZH_imag);
-    BdrGridFunctionCoefficient::GetNormal(T, normal, invert);
-
-    // n̂ × E.
-    linalg::Cross3(normal, E_real, n_cross_Er);
-    linalg::Cross3(normal, E_imag, n_cross_Ei);
-
-    // n̂ × ZH.
-    linalg::Cross3(normal, ZH_real, n_cross_ZHr);
-    linalg::Cross3(normal, ZH_imag, n_cross_ZHi);
-
-    // This is a hot loop. Manually unrolling and avoiding Vectors significantly
-    // increases performance.
-    PalacePragmaOmp(parallel for schedule(static))
-    for (size_t i = 0; i < r_naughts.size(); i++)
+    for (int j = 0; j < ir.GetNPoints(); j++)
     {
-      const auto &r = r_naughts[i];
+      PalacePragmaOmp(single)
+      {
+        const mfem::IntegrationPoint &ip = ir.IntPoint(j);
+        T.SetIntPoint(&ip);
 
-      double r0 = r[0], r1 = r[1], r2 = r[2];
-      double dot_product = r0 * r_phys(0) + r1 * r_phys(1) + r2 * r_phys(2);
+        MFEM_ASSERT(T.ElementType == mfem::ElementTransformation::BDR_ELEMENT,
+                    "Unexpected element type in BdrSurfaceFluxCoefficient!");
 
-      // Complex phase: exp(i*k*r₀·r') = exp(i*(k_re + ik_im)*dot_product)
-      //                               = exp(i*k_re*dot_product - k_im*dot_product)
-      //                               = exp(-k_im*dot_product) * exp(i*k_re*dot_product).
-      double amplitude = std::exp(-k_im * dot_product);
-      double phase_re = k_re * dot_product;
-      double cos_phase = std::cos(phase_re);
-      double sin_phase = std::sin(phase_re);
+        bool invert = BdrGridFunctionCoefficient::GetBdrElementNeighborTransformations(
+            T.ElementNo, *mesh, FET, T1, T2, &ip);  // NOTE: this updates FET.
+        MFEM_VERIFY(!FET.Elem2,
+                    "FarField computations are only supported on external boundaries.")
 
-      // Complex weight: prefactor * exp(i*k*r₀·r').
-      double w_real = amplitude * (prefactor_re * cos_phase - prefactor_im * sin_phase);
-      double w_imag = amplitude * (prefactor_re * sin_phase + prefactor_im * cos_phase);
+        T.Transform(ip, r_phys);
 
-      // r₀ × (n̂ × ZH).
-      double cr0 = r1 * n_cross_ZHr(2) - r2 * n_cross_ZHr(1);
-      double cr1 = r2 * n_cross_ZHr(0) - r0 * n_cross_ZHr(2);
-      double cr2 = r0 * n_cross_ZHr(1) - r1 * n_cross_ZHr(0);
+        // Evaluate E and B fields on this element.
+        E.Real().GetVectorValue(*FET.Elem1, FET.Elem1->GetIntPoint(), E_real);
+        E.Imag().GetVectorValue(*FET.Elem1, FET.Elem1->GetIntPoint(), E_imag);
+        B.Real().GetVectorValue(*FET.Elem1, FET.Elem1->GetIntPoint(), B_real);
+        B.Imag().GetVectorValue(*FET.Elem1, FET.Elem1->GetIntPoint(), B_imag);
 
-      double ci0 = r1 * n_cross_ZHi(2) - r2 * n_cross_ZHi(1);
-      double ci1 = r2 * n_cross_ZHi(0) - r0 * n_cross_ZHi(2);
-      double ci2 = r0 * n_cross_ZHi(1) - r1 * n_cross_ZHi(0);
+        // We assume that the material is isotropic, so the wave speed is a scalar.
+        const double wave_speed = mat_op.GetLightSpeedMax(FET.Elem1->Attribute);
+        k_re = omega_re / wave_speed;
+        k_im = omega_im / wave_speed;
+        const double quadrature_weight = ip.weight * T.Weight();
 
-      // Complex multiplication: (A + iB) * (w_real + i*w_imag).
-      double A0 = n_cross_Er(0) - cr0, B0 = n_cross_Ei(0) - ci0;
-      double A1 = n_cross_Er(1) - cr1, B1 = n_cross_Ei(1) - ci1;
-      double A2 = n_cross_Er(2) - cr2, B2 = n_cross_Ei(2) - ci2;
+        // Complex prefactor: (ik/4π) = (i(k_re + ik_im)/4π) = (ik_re - k_im)/4π.
+        prefactor_re = -quadrature_weight * k_im / (4 * M_PI);
+        prefactor_im = quadrature_weight * k_re / (4 * M_PI);
 
-      integrand_r[i][0] += A0 * w_real - B0 * w_imag;
-      integrand_r[i][1] += A1 * w_real - B1 * w_imag;
-      integrand_r[i][2] += A2 * w_real - B2 * w_imag;
+        // Z * H = c0 * B.
+        mat_op.GetLightSpeed(FET.Elem1->Attribute).Mult(B_real, ZH_real);
+        mat_op.GetLightSpeed(FET.Elem1->Attribute).Mult(B_imag, ZH_imag);
+        BdrGridFunctionCoefficient::GetNormal(T, normal, invert);
 
-      integrand_i[i][0] += A0 * w_imag + B0 * w_real;
-      integrand_i[i][1] += A1 * w_imag + B1 * w_real;
-      integrand_i[i][2] += A2 * w_imag + B2 * w_real;
+        // n̂ × E.
+        linalg::Cross3(normal, E_real, n_cross_Er);
+        linalg::Cross3(normal, E_imag, n_cross_Ei);
+
+        // n̂ × ZH.
+        linalg::Cross3(normal, ZH_real, n_cross_ZHr);
+        linalg::Cross3(normal, ZH_imag, n_cross_ZHi);
+
+        r_phys0 = r_phys(0);
+        r_phys1 = r_phys(1);
+        r_phys2 = r_phys(2);
+        n_cross_Er0 = n_cross_Er(0);
+        n_cross_Er1 = n_cross_Er(1);
+        n_cross_Er2 = n_cross_Er(2);
+        n_cross_Ei0 = n_cross_Ei(0);
+        n_cross_Ei1 = n_cross_Ei(1);
+        n_cross_Ei2 = n_cross_Ei(2);
+        n_cross_ZHr0 = n_cross_ZHr(0);
+        n_cross_ZHr1 = n_cross_ZHr(1);
+        n_cross_ZHr2 = n_cross_ZHr(2);
+        n_cross_ZHi0 = n_cross_ZHi(0);
+        n_cross_ZHi1 = n_cross_ZHi(1);
+        n_cross_ZHi2 = n_cross_ZHi(2);
+      }
+
+      // This is a hot loop. Keep a single parallel region outside the quadrature loop
+      // and distribute the observation-direction work with omp for.
+      PalacePragmaOmp(for schedule(static))
+      for (size_t i = 0; i < r_naughts.size(); i++)
+      {
+        const auto &r = r_naughts[i];
+
+        const double r0 = r[0], r1 = r[1], r2 = r[2];
+        const double dot_product = r0 * r_phys0 + r1 * r_phys1 + r2 * r_phys2;
+
+        // Complex phase: exp(i*k*r₀·r') = exp(i*(k_re + ik_im)*dot_product)
+        //                               = exp(i*k_re*dot_product - k_im*dot_product)
+        //                               = exp(-k_im*dot_product) * exp(i*k_re*dot_product).
+        const double amplitude = std::exp(-k_im * dot_product);
+        const double phase_re = k_re * dot_product;
+        const double cos_phase = std::cos(phase_re);
+        const double sin_phase = std::sin(phase_re);
+
+        // Complex weight: prefactor * exp(i*k*r₀·r').
+        const double w_real = amplitude * (prefactor_re * cos_phase - prefactor_im * sin_phase);
+        const double w_imag = amplitude * (prefactor_re * sin_phase + prefactor_im * cos_phase);
+
+        // r₀ × (n̂ × ZH).
+        const double cr0 = r1 * n_cross_ZHr2 - r2 * n_cross_ZHr1;
+        const double cr1 = r2 * n_cross_ZHr0 - r0 * n_cross_ZHr2;
+        const double cr2 = r0 * n_cross_ZHr1 - r1 * n_cross_ZHr0;
+
+        const double ci0 = r1 * n_cross_ZHi2 - r2 * n_cross_ZHi1;
+        const double ci1 = r2 * n_cross_ZHi0 - r0 * n_cross_ZHi2;
+        const double ci2 = r0 * n_cross_ZHi1 - r1 * n_cross_ZHi0;
+
+        // Complex multiplication: (A + iB) * (w_real + i*w_imag).
+        const double A0 = n_cross_Er0 - cr0, B0 = n_cross_Ei0 - ci0;
+        const double A1 = n_cross_Er1 - cr1, B1 = n_cross_Ei1 - ci1;
+        const double A2 = n_cross_Er2 - cr2, B2 = n_cross_Ei2 - ci2;
+
+        integrand_r[i][0] += A0 * w_real - B0 * w_imag;
+        integrand_r[i][1] += A1 * w_real - B1 * w_imag;
+        integrand_r[i][2] += A2 * w_real - B2 * w_imag;
+
+        integrand_i[i][0] += A0 * w_imag + B0 * w_real;
+        integrand_i[i][1] += A1 * w_imag + B1 * w_real;
+        integrand_i[i][2] += A2 * w_imag + B2 * w_real;
+      }
     }
   }
 }

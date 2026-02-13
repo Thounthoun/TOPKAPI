@@ -171,7 +171,7 @@ ErrorIndicator DrivenSolver::SweepUniform(SpaceOperator &space_op) const
       ksp.Mult(RHS, E);
 
       // Start Post-processing.
-      BlockTimer bt0(Timer::POSTPRO);
+      BlockTimer bt_post_step(Timer::POSTPRO);
       Mpi::Print(" Sol. ||E|| = {:.6e} (||RHS|| = {:.6e})\n",
                  linalg::Norml2(space_op.GetComm(), E),
                  linalg::Norml2(space_op.GetComm(), RHS));
@@ -196,7 +196,7 @@ ErrorIndicator DrivenSolver::SweepUniform(SpaceOperator &space_op) const
     }
 
     // Final postprocessing & printing.
-    BlockTimer bt0(Timer::POSTPRO);
+    BlockTimer bt_post_final(Timer::POSTPRO);
     SaveMetadata(ksp);
   }
   post_op.MeasureFinalize(indicator);
@@ -278,7 +278,7 @@ ErrorIndicator DrivenSolver::SweepAdaptive(SpaceOperator &space_op) const
 
     // Compute B = -1/(iω) ∇ x E on the true dofs, and set the internal GridFunctions in
     // PostOperator for energy postprocessing and error estimation.
-    BlockTimer bt0(Timer::POSTPRO);
+    BlockTimer bt_post_update(Timer::POSTPRO);
     Curl.Mult(E.Real(), B.Real());
     Curl.Mult(E.Imag(), B.Imag());
     B *= -1.0 / (1i * omega);
@@ -373,8 +373,10 @@ ErrorIndicator DrivenSolver::SweepAdaptive(SpaceOperator &space_op) const
   // Main fast frequency sweep loop (online phase).
   Mpi::Print("\nBeginning fast frequency sweep online phase\n");
   space_op.GetWavePortOp().SetSuppressOutput(false);  // Disable output suppression
+  excitation_counter = 0;
   for (const auto &[excitation_idx, excitation_spec] : port_excitations)
   {
+    excitation_counter++;
     if (port_excitations.Size() > 1)
     {
       Mpi::Print("\nSweeping excitation index {:d} ({:d}/{:d}):\n", excitation_idx,
@@ -400,7 +402,7 @@ ErrorIndicator DrivenSolver::SweepAdaptive(SpaceOperator &space_op) const
       Mpi::Print("\n");
 
       // Start Post-processing.
-      BlockTimer bt0(Timer::POSTPRO);
+      BlockTimer bt_post_step(Timer::POSTPRO);
       Mpi::Print(" Sol. ||E|| = {:.6e}\n", linalg::Norml2(space_op.GetComm(), E));
 
       // Compute B = -1/(iω) ∇ x E on the true dofs.
@@ -417,7 +419,7 @@ ErrorIndicator DrivenSolver::SweepAdaptive(SpaceOperator &space_op) const
     }
 
     // Final postprocessing & printing: no change to indicator since these are in PROM.
-    BlockTimer bt0(Timer::POSTPRO);
+    BlockTimer bt_post_final(Timer::POSTPRO);
     SaveMetadata(prom_op.GetLinearSolver());
   }
   post_op.MeasureFinalize(indicator);

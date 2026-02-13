@@ -241,9 +241,9 @@ inline std::string GetLineNastran(std::ifstream &input)
 {
   std::string str;
   std::getline(input, str);
-  MFEM_VERIFY(input.good(), "Unexpected read failure parsing mesh file!");
+  MFEM_VERIFY(!input.fail(), "Unexpected read failure parsing mesh file!");
   str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
-  return str[0] == '$' ? "" : str;
+  return (!str.empty() && str[0] == '$') ? "" : str;
 }
 
 // COMSOL strings are parsed as an integer length followed by array of integers for the

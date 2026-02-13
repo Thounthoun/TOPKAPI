@@ -19,17 +19,12 @@ std::array<double, 2> ComputeDorflerThreshold(MPI_Comm comm, const Vector &e,
   std::vector<double> estimates(e.begin(), e.end());
   std::sort(estimates.begin(), estimates.end());
 
-  // Accumulate the squares of the estimates.
-  std::vector<double> sum(estimates.size());
-  for (auto &x : estimates)
-  {
-    x *= x;
-  }
-  std::partial_sum(estimates.begin(), estimates.end(), sum.begin());
-  for (auto &x : estimates)
-  {
-    x = std::sqrt(x);
-  }
+  // Accumulate squared estimates on a copy to avoid precision loss from in-place
+  // square/sqrt round-trips.
+  std::vector<double> squared_estimates(estimates.size()), sum(estimates.size());
+  std::transform(estimates.begin(), estimates.end(), squared_estimates.begin(),
+                 [](double x) { return x * x; });
+  std::partial_sum(squared_estimates.begin(), squared_estimates.end(), sum.begin());
 
   // The pivot is the first point which leaves (1-θ) of the total sum after it.
   const double local_total = sum.size() > 0 ? sum.back() : 0.0;

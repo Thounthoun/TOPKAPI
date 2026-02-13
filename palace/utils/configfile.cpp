@@ -2548,7 +2548,7 @@ std::pair<std::array<double, 3>, CoordinateSystem> ParseStringAsDirection(std::s
   const bool yfound = str.find("y") != std::string::npos;
   const bool zfound = str.find("z") != std::string::npos;
   const bool rfound = str.find("r") != std::string::npos;
-  const bool is_positive = str.length() == 1 || str[0] == '+';
+  const bool is_positive = !str.empty() && str[0] != '-';
   const int num_found = xfound + yfound + zfound + rfound;
   const bool is_valid =
       (num_found == 1) &&

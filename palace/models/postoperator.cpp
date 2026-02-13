@@ -804,7 +804,7 @@ void PostOperator<solver_t>::MeasureDomainFieldEnergy() const
     }
   }
 
-  if (HasBGridFunction<solver_t>())
+  if constexpr (HasBGridFunction<solver_t>())
   {
     auto &field = A ? *A : *B;
     auto energy = dom_post_op.GetMagneticFieldEnergy(field);

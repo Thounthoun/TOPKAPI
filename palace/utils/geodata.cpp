@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cctype>
 #include <limits>
 #include <numeric>
 #include <queue>
@@ -1438,15 +1439,18 @@ std::unique_ptr<mfem::Mesh> LoadMesh(const std::string &mesh_file, bool remove_c
   constexpr bool generate_edges = false, refine = false, fix_orientation = true;
   std::unique_ptr<mfem::Mesh> mesh;
   fs::path mesh_path(mesh_file);
-  if (mesh_path.extension() == ".mphtxt" || mesh_path.extension() == ".mphbin" ||
-      mesh_path.extension() == ".nas" || mesh_path.extension() == ".bdf")
+  std::string mesh_ext = mesh_path.extension().string();
+  std::transform(mesh_ext.begin(), mesh_ext.end(), mesh_ext.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
+  if (mesh_ext == ".mphtxt" || mesh_ext == ".mphbin" || mesh_ext == ".nas" ||
+      mesh_ext == ".bdf")
   {
     // Put translated mesh in temporary string buffer.
     std::stringstream fi(std::stringstream::in | std::stringstream::out);
     // fi << std::fixed;
     fi << std::scientific;
     fi.precision(MSH_FLT_PRECISION);
-    if (mesh_path.extension() == ".mphtxt" || mesh_path.extension() == ".mphbin")
+    if (mesh_ext == ".mphtxt" || mesh_ext == ".mphbin")
     {
       mesh::ConvertMeshComsol(mesh_file, fi, remove_curvature);
       // mesh::ConvertMeshComsol(mesh_file, fo, remove_curvature);
