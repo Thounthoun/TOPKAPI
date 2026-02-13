@@ -147,11 +147,7 @@ mfem::DenseMatrix MatrixFunction(const mfem::DenseMatrix &M,
       {
         return 0.0;
       }
-      if (std::abs(x) >= tol && std::abs(y) <= tol)
-      {
-        MFEM_ABORT("Logic error: Zero denominator with nonzero numerator!");
-        return 0.0;
-      }
+      MFEM_VERIFY(std::abs(y) > tol, "Logic error: Zero denominator with nonzero numerator!");
       return x / y;
     };
     const double m1 = SafeDivide(d * (c - lambda1) - e * f, f * (b - lambda1) - d * e);

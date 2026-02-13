@@ -1021,6 +1021,7 @@ void PostOperator<solver_t>::MeasureSParameter() const
     {
       // Get previously computed data: should never fail as defined by MeasureLumpedPorts.
       auto &vi = measurement_cache.lumped_port_vi.at(idx);
+      vi.S = data.GetSParameter(*E);
 
       const LumpedPortData &src_data = fem_op->GetLumpedPortOp().GetPort(drive_port_idx);
       if (idx == drive_port_idx)
@@ -1041,6 +1042,7 @@ void PostOperator<solver_t>::MeasureSParameter() const
     {
       // Get previously computed data: should never fail as defined by MeasureWavePorts.
       auto &vi = measurement_cache.wave_port_vi.at(idx);
+      vi.S = data.GetSParameter(*E);
 
       // Wave port modes are not normalized to a characteristic impedance so no generalized
       // S-parameters are available.

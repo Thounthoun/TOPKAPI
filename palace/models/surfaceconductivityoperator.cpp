@@ -161,9 +161,29 @@ void SurfaceConductivityOperator::AddExtraSystemBdrCoefficients(
       if (bdr.h > 0.0)
       {
         double nu = bdr.h / delta;
-        double den = std::cosh(nu) - std::cos(nu);
-        Z.real(Z.real() * (std::sinh(nu) + std::sin(nu)) / den);
-        Z.imag(Z.imag() * (std::sinh(nu) - std::sin(nu)) / den);
+        double ratio_re, ratio_im;
+        if (nu < 0.1)
+        {
+          // Use a series expansion for small nu to avoid catastrophic cancellation in
+          // cosh(nu) - cos(nu) and sinh(nu) - sin(nu).
+          const double nu2 = nu * nu;
+          const double nu3 = nu2 * nu;
+          const double nu4 = nu2 * nu2;
+          const double nu5 = nu4 * nu;
+          const double nu6 = nu3 * nu3;
+          const double nu7 = nu6 * nu;
+          const double den = nu2 + nu6 / 360.0;
+          ratio_re = (2.0 * nu + nu5 / 60.0) / den;
+          ratio_im = (nu3 / 3.0 + nu7 / 2520.0) / den;
+        }
+        else
+        {
+          const double den = std::cosh(nu) - std::cos(nu);
+          ratio_re = (std::sinh(nu) + std::sin(nu)) / den;
+          ratio_im = (std::sinh(nu) - std::sin(nu)) / den;
+        }
+        Z.real(Z.real() * ratio_re);
+        Z.imag(Z.imag() * ratio_im);
       }
       // The BC term has coefficient iω/Z (like for standard lumped surface impedance).
       std::complex<double> s(1i * omega / Z);

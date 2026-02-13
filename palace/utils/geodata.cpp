@@ -287,8 +287,9 @@ std::unique_ptr<mfem::ParMesh> ReadMesh(IoData &iodata, MPI_Comm comm)
                       // the saved serial mesh (refinement marking, for example)
       so = fo.str();
       // so = zlib::CompressString(fo.str());
+      MFEM_VERIFY(so.size() <= static_cast<std::size_t>(std::numeric_limits<int>::max()),
+                  "Overflow in stringbuffer size!");
       slen = static_cast<int>(so.size());
-      MFEM_VERIFY(so.size() == (std::size_t)slen, "Overflow in stringbuffer size!");
     }
     Mpi::Broadcast(1, &slen, 0, node_comm);
     if (so.empty())
