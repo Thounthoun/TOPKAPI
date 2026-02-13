@@ -139,13 +139,34 @@ double NonLinearEigenvalueSolver::GetError(int i, EigenvalueSolver::ErrorType ty
 
 void NonLinearEigenvalueSolver::RescaleEigenvectors(int num_eig)
 {
+  constexpr double tol = 1.0e-14;
   res = std::make_unique<double[]>(num_eig);
   xscale = std::make_unique<double[]>(num_eig);
   for (int i = 0; i < num_eig; i++)
   {
     x1 = eigenvectors[i];
-    xscale.get()[i] = 1.0 / GetEigenvectorNorm(x1, y1);
-    res.get()[i] = GetResidualNorm(eigenvalues[i], x1, y1) / linalg::Norml2(comm, x1);
+    const double norm = GetEigenvectorNorm(x1, y1);
+    if (norm > tol)
+    {
+      xscale.get()[i] = 1.0 / norm;
+    }
+    else
+    {
+      xscale.get()[i] = 0.0;
+      MFEM_WARNING("Encountered near-zero eigenvector norm while rescaling eigenvectors; "
+                   "disabling scaling for the affected mode!");
+    }
+    const double xnorm = linalg::Norml2(comm, x1);
+    if (xnorm > tol)
+    {
+      res.get()[i] = GetResidualNorm(eigenvalues[i], x1, y1) / xnorm;
+    }
+    else
+    {
+      res.get()[i] = 0.0;
+      MFEM_WARNING("Encountered near-zero eigenvector while computing residual norm; "
+                   "setting residual to zero for the affected mode!");
+    }
   }
 }
 

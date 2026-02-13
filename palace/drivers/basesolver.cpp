@@ -217,10 +217,18 @@ void BaseSolver::SolveEstimateMarkRefine(std::vector<std::unique_ptr<Mesh>> &mes
         min_elem = max_elem = mesh.back()->GetNE();
         Mpi::GlobalMin(1, &min_elem, comm);
         Mpi::GlobalMax(1, &max_elem, comm);
-        const auto ratio_post = double(max_elem) / min_elem;
-        Mpi::Print(" Rebalanced mesh: Ratio {:.3f} exceeded max. allowed value {:.3f} "
-                   "(new ratio = {:.3f})\n",
-                   ratio_pre, refinement.maximum_imbalance, ratio_post);
+        if (min_elem > 0)
+        {
+          const auto ratio_post = double(max_elem) / min_elem;
+          Mpi::Print(" Rebalanced mesh: Ratio {:.3f} exceeded max. allowed value {:.3f} "
+                     "(new ratio = {:.3f})\n",
+                     ratio_pre, refinement.maximum_imbalance, ratio_post);
+        }
+        else
+        {
+          Mpi::Warning(" Rebalanced mesh encountered zero local elements on at least one "
+                       "rank; skipping post-balance ratio report!");
+        }
       }
       mesh.back()->Update();
     }

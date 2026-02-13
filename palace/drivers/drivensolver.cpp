@@ -143,6 +143,8 @@ ErrorIndicator DrivenSolver::SweepUniform(SpaceOperator &space_op) const
          omega_i < omega_sample.size(); omega_i++)
     {
       auto omega = omega_sample[omega_i];
+      MFEM_VERIFY(omega > 0.0,
+                  "Driven solver requires positive frequency samples (omega > 0)!");
       // Assemble frequency dependent matrices and initialize operators in linear
       // solver.
       auto A2 = space_op.GetExtraSystemMatrix<ComplexOperator>(omega, Operator::DIAG_ZERO);
@@ -268,6 +270,8 @@ ErrorIndicator DrivenSolver::SweepAdaptive(SpaceOperator &space_op) const
   // of the RomOperator.
   auto UpdatePROM = [&](int excitation_idx, double omega)
   {
+    MFEM_VERIFY(omega > 0.0,
+                "Driven solver requires positive frequency samples (omega > 0)!");
     // Add the HDM solution to the PROM reduced basis.
     prom_op.UpdatePROM(E);
     prom_op.UpdateMRI(excitation_idx, omega, E);
@@ -383,6 +387,8 @@ ErrorIndicator DrivenSolver::SweepAdaptive(SpaceOperator &space_op) const
     for (std::size_t omega_i = 0; omega_i < omega_sample.size(); omega_i++)
     {
       auto omega = omega_sample[omega_i];
+      MFEM_VERIFY(omega > 0.0,
+                  "Driven solver requires positive frequency samples (omega > 0)!");
       Mpi::Print("\nIt {:d}/{:d}: ω/2π = {:.3e} GHz (total elapsed time = {:.2e} s)\n",
                  omega_i + 1, omega_sample.size(),
                  iodata.units.Dimensionalize<Units::ValueType::FREQUENCY>(omega) /

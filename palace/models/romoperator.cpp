@@ -208,6 +208,14 @@ void MinimalRationalInterpolation::AddSolutionSample(double omega, const Complex
   }
   OrthogonalizeColumn(orthog_type, comm, Q, Q[dim_Q], R.col(dim_Q).data(), dim_Q);
   R(dim_Q, dim_Q) = linalg::Norml2(comm, Q[dim_Q]);
+  if (R(dim_Q, dim_Q) <= ORTHOG_TOL)
+  {
+    // Skip linearly dependent snapshots to avoid division-by-zero and basis corruption.
+    R.conservativeResize(dim_Q, dim_Q);
+    MFEM_WARNING("Discarding linearly dependent PROM snapshot at omega = "
+                 << omega << "!");
+    return;
+  }
   Q[dim_Q] *= 1.0 / R(dim_Q, dim_Q);
   dim_Q++;
   ComputeMRI(R, q);
@@ -278,10 +286,18 @@ std::vector<double> MinimalRationalInterpolation::FindMaxError(int N) const
   if (std::abs(z_star[0]) == 0.0)
   {
     const auto delta = (end - start) / 1.0e6;
+    MFEM_VERIFY(delta > 0.0,
+                "Could not sample parameter range to locate PROM maximum error!");
     std::vector<double> Q_star(N, mfem::infinity());
     while (start <= end)
     {
-      const double Q = std::abs((q.array() / (z_map.array() - start)).sum());
+      const auto den = (z_map.array() - start);
+      if ((den.abs() <= ORTHOG_TOL).any())
+      {
+        start += delta;
+        continue;
+      }
+      const double Q = std::abs((q.array() / den).sum());
       for (int i = 0; i < N; i++)
       {
         if (Q < Q_star[i])

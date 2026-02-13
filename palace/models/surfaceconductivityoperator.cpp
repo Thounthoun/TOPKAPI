@@ -46,17 +46,19 @@ void SurfaceConductivityOperator::SetUpBoundaryProperties(const IoData &iodata,
     {
       for (auto attr : data.attributes)
       {
+        if (attr <= 0 || attr > bdr_attr_max)
+        {
+          bdr_warn_list.insert(attr);
+          continue;
+        }
         MFEM_VERIFY(!conductivity_marker[attr - 1],
                     "Multiple definitions of conductivity boundary properties for boundary "
                     "attribute "
                         << attr << "!");
         conductivity_marker[attr - 1] = 1;
-        // MFEM_VERIFY(attr > 0 && attr <= bdr_attr_max,
-        //             "Conductivity boundary attribute tags must be non-negative and "
-        //             "correspond to attributes in the mesh!");
         // MFEM_VERIFY(bdr_attr_marker[attr - 1],
         //             "Unknown conductivity boundary attribute " << attr << "!");
-        if (attr <= 0 || attr > bdr_attr_max || !bdr_attr_marker[attr - 1])
+        if (!bdr_attr_marker[attr - 1])
         {
           bdr_warn_list.insert(attr);
         }

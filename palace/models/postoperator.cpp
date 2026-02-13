@@ -788,7 +788,7 @@ void PostOperator<solver_t>::MeasureDomainFieldEnergy() const
     for (const auto &[idx, data] : dom_post_op.M_i)
     {
       auto energy_i = dom_post_op.GetDomainElectricFieldEnergy(idx, field);
-      auto participation_ratio = std::abs(energy_i) > 0.0 ? energy_i / energy : 0.0;
+      auto participation_ratio = std::abs(energy) > 0.0 ? energy_i / energy : 0.0;
       measurement_cache.domain_E_field_energy_i.emplace_back(
           Measurement::DomainData{idx, energy_i, participation_ratio});
     }

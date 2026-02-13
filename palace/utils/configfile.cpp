@@ -728,11 +728,14 @@ void CurrentDipoleSourceData::SetUp(json &domains)
     {
       // Attempt to parse as an array.
       data.direction = direction->get<std::array<double, 3>>();
-      double norm = data.direction[0] * data.direction[0] +
-                    data.direction[1] * data.direction[1] +
-                    data.direction[2] * data.direction[2];
+      double norm = std::sqrt(data.direction[0] * data.direction[0] +
+                              data.direction[1] * data.direction[1] +
+                              data.direction[2] * data.direction[2]);
+      MFEM_VERIFY(norm > 0.0, "Current dipole direction must be non-zero!");
       for (auto &x : data.direction)
+      {
         x /= norm;
+      }
     }
     else
     {
@@ -784,8 +787,8 @@ void DomainData::SetUp(json &config)
   attributes.shrink_to_fit();
   for (const auto &attr : postpro.attributes)
   {
-    MFEM_VERIFY(std::lower_bound(attributes.begin(), attributes.end(), attr) !=
-                    attributes.end(),
+    auto it = std::lower_bound(attributes.begin(), attributes.end(), attr);
+    MFEM_VERIFY(it != attributes.end() && *it == attr,
                 "Domain postprocessing can only be enabled on domains which have a "
                 "corresponding \"Materials\" entry!");
   }
@@ -1844,6 +1847,7 @@ std::vector<double> ConstructLinearRange(double start, double end, double delta)
 }
 std::vector<double> ConstructLinearRange(double start, double end, int n_sample)
 {
+  MFEM_VERIFY(n_sample >= 2, "NSample must be >= 2 for frequency range construction!");
   std::vector<double> f(n_sample);
   for (int i = 0; i < n_sample; i++)
   {
@@ -1913,6 +1917,7 @@ void DrivenSolverData::SetUp(json &solver)
     double min_f = driven->at("MinFreq");     // Required
     double max_f = driven->at("MaxFreq");     // Required
     double delta_f = driven->at("FreqStep");  // Required
+    MFEM_VERIFY(delta_f > 0.0, "\"FreqStep\" must be positive!");
     sample_f = ConstructLinearRange(min_f, max_f, delta_f);
     if (int save_step = driven->value("SaveStep", 0); save_step > 0)
     {
@@ -1947,6 +1952,8 @@ void DrivenSolverData::SetUp(json &solver)
               }
               if (n_sample > 0)
               {
+                MFEM_VERIFY(n_sample >= 2,
+                            "\"NSample\" must be >= 2 for \"Type\": \"Linear\"!");
                 return ConstructLinearRange(min_f, max_f, n_sample);
               }
             }

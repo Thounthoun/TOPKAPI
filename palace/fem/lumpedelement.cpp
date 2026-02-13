@@ -67,6 +67,7 @@ UniformElementData::UniformElementData(const std::array<double, 3> &input_dir,
   // be incorrect by a factor of 2).
   double area = mesh::GetSurfaceArea(mesh, attr_marker);
   MFEM_VERIFY(area > 0.0, "Uniform lumped element has zero area!");
+  MFEM_VERIFY(l > 0.0, "Lumped element length must be positive!");
   w = area / l;
 }
 
