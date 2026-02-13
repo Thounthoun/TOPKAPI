@@ -3,6 +3,8 @@
 
 #include "waveportoperator.hpp"
 
+#include <cmath>
+#include <limits>
 #include <tuple>
 #include <fmt/ranges.h>
 #include "fem/bilinearform.hpp"
@@ -245,7 +247,7 @@ GetSystemMatrixA(const mfem::HypreParMatrix *Attr, const mfem::HypreParMatrix *A
   Ar->EliminateBC(dbc_tdof_list, Operator::DIAG_ONE);
   if (Ai)
   {
-    Ai->EliminateBC(dbc_tdof_list, Operator::DIAG_ZERO);
+    Ai->EliminateBC(dbc_tdof_list, Operator::DIAG_ONE);
   }
 
   return {std::move(Ar), std::move(Ai)};
@@ -297,7 +299,14 @@ void Normalize(const GridFunction &S0t, GridFunction &E0t, GridFunction &E0n,
       {sr * S0t.Real(), si * S0t.Real()},
       {-(sr * E0t.Real()) - (si * E0t.Imag()), -(sr * E0t.Imag()) + (si * E0t.Real())}};
   Mpi::GlobalSum(2, dot, S0t.ParFESpace()->GetComm());
-  auto scale = std::abs(dot[0]) / (dot[0] * std::sqrt(std::abs(dot[1])));
+  constexpr double tol = 10.0 * std::numeric_limits<double>::epsilon();
+  const double dot0_abs = std::abs(dot[0]);
+  const double dot1_abs = std::abs(dot[1]);
+  MFEM_VERIFY(std::isfinite(dot1_abs) && dot1_abs > tol,
+              "Invalid wave port normalization: near-zero mode power!");
+  const std::complex<double> phase =
+      (dot0_abs > tol) ? (dot[0] / dot0_abs) : std::complex<double>(1.0, 0.0);
+  auto scale = 1.0 / (phase * std::sqrt(dot1_abs));
   ComplexVector::AXPBY(scale, E0t.Real(), E0t.Imag(), 0.0, E0t.Real(), E0t.Imag());
   ComplexVector::AXPBY(scale, E0n.Real(), E0n.Imag(), 0.0, E0n.Real(), E0n.Imag());
   ComplexVector::AXPBY(scale, sr, si, 0.0, sr, si);
@@ -878,6 +887,8 @@ void WavePortData::Initialize(double omega)
 
   // Extract the eigenmode solution and postprocess. The extracted eigenvalue is λ =
   // 1 / (-kₙ² - σ).
+  constexpr double tol = 10.0 * std::numeric_limits<double>::epsilon();
+  MFEM_VERIFY(std::abs(lambda) > tol, "Wave port eigensolver produced near-zero eigenvalue!");
   kn0 = std::sqrt(-sigma - 1.0 / lambda);
   omega0 = omega;
 
@@ -906,7 +917,17 @@ void WavePortData::Initialize(double omega)
     e0nr.UseDevice(true);
     e0ti.UseDevice(true);
     e0ni.UseDevice(true);
-    ComplexVector::AXPBY(1.0 / (1i * kn0), e0nr, e0ni, 0.0, e0nr, e0ni);
+    if (std::abs(kn0) > tol)
+    {
+      ComplexVector::AXPBY(1.0 / (1i * kn0), e0nr, e0ni, 0.0, e0nr, e0ni);
+    }
+    else
+    {
+      MFEM_WARNING("Encountered near-zero wave port propagation constant; setting "
+                   "longitudinal field component to zero during normalization!");
+      e0nr = 0.0;
+      e0ni = 0.0;
+    }
     port_E0t->Real().SetFromTrueDofs(e0tr);  // Parallel distribute
     port_E0t->Imag().SetFromTrueDofs(e0ti);
     port_E0n->Real().SetFromTrueDofs(e0nr);

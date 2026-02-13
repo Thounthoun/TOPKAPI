@@ -341,15 +341,17 @@ void MaterialOperator::SetUpFloquetWaveVector(const IoData &iodata,
   // Ensure Floquet wave vector components are in range [-π/L, π/L].
   for (int i = 0; i < sdim; i++)
   {
-    if (wave_vector[i] > M_PI / bbmax[i])
+    MFEM_VERIFY(bbmax[i] > tol, "Invalid zero periodic mesh extent in Floquet setup!");
+    const double kmax = M_PI / bbmax[i];
+    if (wave_vector[i] > kmax)
     {
       wave_vector[i] =
-          -M_PI / bbmax[i] + fmod(wave_vector[i] + M_PI / bbmax[i], 2 * M_PI / bbmax[i]);
+          -kmax + fmod(wave_vector[i] + kmax, 2 * kmax);
     }
-    else if (wave_vector[i] < M_PI / bbmax[i])
+    else if (wave_vector[i] < -kmax)
     {
       wave_vector[i] =
-          M_PI / bbmax[i] + fmod(wave_vector[i] - M_PI / bbmax[i], 2 * M_PI / bbmax[i]);
+          kmax + fmod(wave_vector[i] - kmax, 2 * kmax);
     }
   }
 

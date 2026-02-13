@@ -19,6 +19,14 @@ FarfieldBoundaryOperator::FarfieldBoundaryOperator(const IoData &iodata,
                                                    const mfem::ParMesh &mesh)
   : mat_op(mat_op), farfield_attr(SetUpBoundaryProperties(iodata, mesh))
 {
+  farfield_normal.SetSize(mesh.SpaceDimension());
+  farfield_normal = 0.0;
+  if (farfield_attr.Size())
+  {
+    farfield_normal =
+        mesh::GetSurfaceNormal(mesh, mesh::AttrToMarker(mesh.bdr_attributes.Max(), farfield_attr));
+  }
+
   // Print out BC info for all farfield attributes.
   if (farfield_attr.Size())
   {
@@ -117,14 +125,9 @@ void FarfieldBoundaryOperator::AddExtraSystemBdrCoefficients(
         linalg::Mult(mat_op.GetInvPermeability(), mat_op.GetLightSpeed());
     MaterialPropertyCoefficient muinvc0_func(mat_op.GetBdrAttributeToMaterial(), muinvc0);
     muinvc0_func.RestrictCoefficient(mat_op.GetCeedBdrAttributes(farfield_attr));
-
-    // Instead getting the correct normal of farfield boundary elements, just pick the
-    // the first element normal. This is fine as long as the farfield material properties
-    // are not anisotropic.
-    mfem::Vector normal(mat_op.SpaceDimension());
-    normal = 0.0;
-    normal(0) = 1.0;
-    muinvc0_func.NormalProjectedCoefficient(normal);
+    MFEM_VERIFY(farfield_normal.Norml2() > 0.0,
+                "Failed to compute farfield boundary normal for absorbing boundary!");
+    muinvc0_func.NormalProjectedCoefficient(farfield_normal);
 
     dfbi.AddCoefficient(muinvc0_func.GetAttributeToMaterial(),
                         muinvc0_func.GetMaterialProperties(), 0.5 / omega);

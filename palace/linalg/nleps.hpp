@@ -172,13 +172,13 @@ private:
   mutable double normK, normC, normM;
 
   // Update frequency of the preconditioner during Newton iterations.
-  int preconditioner_lag;
+  int preconditioner_lag = 10;
 
   // Update tolerance of the preconditioner (no update below tol).
-  double preconditioner_tol;
+  double preconditioner_tol = 1.0e-4;
 
   // Maximum number of Newton attempts with the same initial guess.
-  int max_restart;
+  int max_restart = 2;
 
   // Refine linear eigenvalues with nonlinear Newton eigenvalue solver.
   bool refine_nonlinear;

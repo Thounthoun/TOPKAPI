@@ -374,6 +374,7 @@ void SlepcEigenvalueSolver::SetDivFreeProjector(const DivFreeSolver<ComplexVecto
 void SlepcEigenvalueSolver::SetBMat(const Operator &B)
 {
   opB = &B;
+  PalacePetscCall(MatDestroy(&B0));
 }
 
 void SlepcEigenvalueSolver::SetShiftInvert(std::complex<double> s, bool precond)

@@ -25,6 +25,9 @@ private:
   // List of all absorbing boundary condition attributes.
   mfem::Array<int> farfield_attr;
 
+  // Average outward normal for the selected farfield boundary attributes.
+  mfem::Vector farfield_normal;
+
   // First- or second-order absorbing boundary condition.
   int order;
 

@@ -34,11 +34,11 @@ namespace palace
 class BdrGridFunctionCoefficient
 {
 protected:
-  // XX TODO: For thread-safety (multiple threads evaluating a coefficient simultaneously),
-  //          the FET, FET.Elem1, and FET.Elem2 objects cannot be shared.
+  // Thread-local storage for temporary face transformations in coefficient evaluation.
   const mfem::ParMesh &mesh;
-  mfem::FaceElementTransformations FET;
-  mfem::IsoparametricTransformation T1, T2;
+  inline static thread_local mfem::FaceElementTransformations FET{};
+  inline static thread_local mfem::IsoparametricTransformation T1{};
+  inline static thread_local mfem::IsoparametricTransformation T2{};
   const double scaling;  // scaling factor used for unit conversions
 
   bool GetBdrElementNeighborTransformations(int i, const mfem::IntegrationPoint &ip)
