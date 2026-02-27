@@ -6,6 +6,7 @@
 #if defined(PALACE_WITH_SLEPC)
 
 #include <algorithm>
+#include <cmath>
 #include <petsc.h>
 #include <slepc.h>
 #include <mfem.hpp>
@@ -497,15 +498,36 @@ PetscReal SlepcEigenvalueSolver::GetError(int i, EigenvalueSolver::ErrorType typ
 
 void SlepcEigenvalueSolver::RescaleEigenvectors(int num_eig)
 {
+  constexpr PetscReal tol = 1.0e-14;
   res = std::make_unique<PetscReal[]>(num_eig);
   xscale = std::make_unique<PetscReal[]>(num_eig);
   for (int i = 0; i < num_eig; i++)
   {
     xscale.get()[i] = 0.0;
     GetEigenvector(i, x1);
-    xscale.get()[i] = 1.0 / GetEigenvectorNorm(x1, y1);
-    res.get()[i] =
-        GetResidualNorm(GetEigenvalue(i), x1, y1) / linalg::Norml2(GetComm(), x1);
+    const PetscReal norm = GetEigenvectorNorm(x1, y1);
+    if (std::isfinite(norm) && norm > tol)
+    {
+      xscale.get()[i] = 1.0 / norm;
+    }
+    else
+    {
+      xscale.get()[i] = 0.0;
+      MFEM_WARNING("Encountered invalid eigenvector norm while rescaling eigenvectors; "
+                   "setting scaling to zero for the affected mode!");
+    }
+
+    const PetscReal xnorm = linalg::Norml2(GetComm(), x1);
+    if (std::isfinite(xnorm) && xnorm > tol)
+    {
+      res.get()[i] = GetResidualNorm(GetEigenvalue(i), x1, y1) / xnorm;
+    }
+    else
+    {
+      res.get()[i] = 0.0;
+      MFEM_WARNING("Encountered invalid eigenvector norm while computing residual norm; "
+                   "setting residual to zero for the affected mode!");
+    }
   }
 }
 

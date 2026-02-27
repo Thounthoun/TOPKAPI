@@ -6,6 +6,7 @@
 #if defined(PALACE_WITH_ARPACK)
 
 #include <algorithm>
+#include <cmath>
 #include <string>
 #include <mfem.hpp>
 // clang-format off
@@ -462,13 +463,35 @@ double ArpackEigenvalueSolver::GetError(int i, EigenvalueSolver::ErrorType type)
 
 void ArpackEigenvalueSolver::RescaleEigenvectors(int num_eig)
 {
+  constexpr double tol = 1.0e-14;
   res = std::make_unique<double[]>(num_eig);
   xscale = std::make_unique<double[]>(num_eig);
   for (int i = 0; i < num_eig; i++)
   {
     x1.Set(V.get() + i * n, n, false);
-    xscale.get()[i] = 1.0 / GetEigenvectorNorm(x1, y1);
-    res.get()[i] = GetResidualNorm(eig.get()[i], x1, y1) / linalg::Norml2(comm, x1);
+    const double norm = GetEigenvectorNorm(x1, y1);
+    if (std::isfinite(norm) && norm > tol)
+    {
+      xscale.get()[i] = 1.0 / norm;
+    }
+    else
+    {
+      xscale.get()[i] = 0.0;
+      MFEM_WARNING("Encountered invalid eigenvector norm while rescaling eigenvectors; "
+                   "setting scaling to zero for the affected mode!");
+    }
+
+    const double xnorm = linalg::Norml2(comm, x1);
+    if (std::isfinite(xnorm) && xnorm > tol)
+    {
+      res.get()[i] = GetResidualNorm(eig.get()[i], x1, y1) / xnorm;
+    }
+    else
+    {
+      res.get()[i] = 0.0;
+      MFEM_WARNING("Encountered invalid eigenvector norm while computing residual norm; "
+                   "setting residual to zero for the affected mode!");
+    }
   }
 }
 

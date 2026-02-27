@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include <limits>
+#include <sstream>
 #include <tuple>
 #include <fmt/ranges.h>
 #include "fem/bilinearform.hpp"
@@ -31,64 +32,6 @@ using namespace std::complex_literals;
 
 namespace
 {
-
-void GetEssentialTrueDofs(mfem::ParGridFunction &E0t, mfem::ParGridFunction &E0n,
-                          mfem::ParGridFunction &port_E0t, mfem::ParGridFunction &port_E0n,
-                          mfem::ParTransferMap &port_nd_transfer,
-                          mfem::ParTransferMap &port_h1_transfer,
-                          const mfem::Array<int> &dbc_attr,
-                          mfem::Array<int> &port_nd_dbc_tdof_list,
-                          mfem::Array<int> &port_h1_dbc_tdof_list)
-{
-  auto &nd_fespace = *E0t.ParFESpace();
-  auto &h1_fespace = *E0n.ParFESpace();
-  auto &port_nd_fespace = *port_E0t.ParFESpace();
-  auto &port_h1_fespace = *port_E0n.ParFESpace();
-  const auto &mesh = *nd_fespace.GetParMesh();
-
-  mfem::Array<int> dbc_marker, nd_dbc_tdof_list, h1_dbc_tdof_list;
-  mesh::AttrToMarker(mesh.bdr_attributes.Size() ? mesh.bdr_attributes.Max() : 0, dbc_attr,
-                     dbc_marker);
-  nd_fespace.GetEssentialTrueDofs(dbc_marker, nd_dbc_tdof_list);
-  h1_fespace.GetEssentialTrueDofs(dbc_marker, h1_dbc_tdof_list);
-
-  Vector tE0t(nd_fespace.GetTrueVSize()), tE0n(h1_fespace.GetTrueVSize());
-  tE0t.UseDevice(true);
-  tE0n.UseDevice(true);
-  tE0t = 0.0;
-  tE0n = 0.0;
-  linalg::SetSubVector(tE0t, nd_dbc_tdof_list, 1.0);
-  linalg::SetSubVector(tE0n, h1_dbc_tdof_list, 1.0);
-  E0t.SetFromTrueDofs(tE0t);
-  E0n.SetFromTrueDofs(tE0n);
-  port_nd_transfer.Transfer(E0t, port_E0t);
-  port_h1_transfer.Transfer(E0n, port_E0n);
-
-  Vector port_tE0t(port_nd_fespace.GetTrueVSize()),
-      port_tE0n(port_h1_fespace.GetTrueVSize());
-  port_tE0t.UseDevice(true);
-  port_tE0n.UseDevice(true);
-  port_E0t.ParallelProject(port_tE0t);
-  port_E0n.ParallelProject(port_tE0n);
-  {
-    const auto *h_port_tE0t = port_tE0t.HostRead();
-    const auto *h_port_tE0n = port_tE0n.HostRead();
-    for (int i = 0; i < port_tE0t.Size(); i++)
-    {
-      if (h_port_tE0t[i] != 0.0)
-      {
-        port_nd_dbc_tdof_list.Append(i);
-      }
-    }
-    for (int i = 0; i < port_tE0n.Size(); i++)
-    {
-      if (h_port_tE0n[i] != 0.0)
-      {
-        port_h1_dbc_tdof_list.Append(i);
-      }
-    }
-  }
-}
 
 void GetInitialSpace(const mfem::ParFiniteElementSpace &nd_fespace,
                      const mfem::ParFiniteElementSpace &h1_fespace,
@@ -577,85 +520,120 @@ WavePortData::WavePortData(const config::WavePortData &data,
     }
   }
 
-  // Extract Dirichlet BC true dofs for the port FE spaces.
+  // Wave port mode solves are performed on a gathered serial mesh on port_root.
+  MPI_Comm comm = nd_fespace.GetComm();
+  const bool has_port_dofs = (port_nd_fespace->GetVSize() > 0 || port_h1_fespace->GetVSize() > 0);
+  port_root = has_port_dofs ? Mpi::Rank(comm) : Mpi::Size(comm);
+  Mpi::GlobalMin(1, &port_root, comm);
+  MFEM_VERIFY(port_root < Mpi::Size(comm), "No root process found for port!");
+
+  // Gather port mesh to root and serialize for deterministic source interpolation on all
+  // participating ranks.
   {
-    mfem::Array<int> port_nd_dbc_tdof_list, port_h1_dbc_tdof_list;
-    GetEssentialTrueDofs(E0t.Real(), E0n.Real(), port_E0t->Real(), port_E0n->Real(),
-                         *port_nd_transfer, *port_h1_transfer, dbc_attr,
-                         port_nd_dbc_tdof_list, port_h1_dbc_tdof_list);
-    int nd_tdof_offset = port_nd_fespace->GetTrueVSize();
-    port_dbc_tdof_list.Reserve(port_nd_dbc_tdof_list.Size() + port_h1_dbc_tdof_list.Size());
-    for (auto tdof : port_nd_dbc_tdof_list)
+    mfem::Mesh serial_port_mesh = port_mesh->Get().GetSerialMesh(port_root);
+    if (Mpi::Rank(comm) == port_root)
     {
-      port_dbc_tdof_list.Append(tdof);
+      std::ostringstream so(std::stringstream::out);
+      so << std::scientific;
+      so.precision(16);
+      serial_port_mesh.Print(so);
+      port_serial_mesh_data = so.str();
     }
-    for (auto tdof : port_h1_dbc_tdof_list)
+    int slen = static_cast<int>(port_serial_mesh_data.size());
+    Mpi::Broadcast(1, &slen, port_root, comm);
+    if (Mpi::Rank(comm) != port_root)
     {
-      port_dbc_tdof_list.Append(tdof + nd_tdof_offset);
+      port_serial_mesh_data.resize(slen);
+    }
+    if (slen > 0)
+    {
+      Mpi::Broadcast(slen, port_serial_mesh_data.data(), port_root, comm);
     }
   }
-
-  // Create vector for initial space for eigenvalue solves and eigenmode solution.
-  GetInitialSpace(*port_nd_fespace, *port_h1_fespace, port_dbc_tdof_list, v0);
-  e0.SetSize(port_nd_fespace->GetTrueVSize() + port_h1_fespace->GetTrueVSize());
-  e0.UseDevice(true);
 
   // The operators for the generalized eigenvalue problem are:
   //                [Aₜₜ  Aₜₙ] [eₜ] = -kₙ² [Bₜₜ  0ₜₙ] [eₜ]
   //                [Aₙₜ  Aₙₙ] [eₙ]        [0ₙₜ  0ₙₙ] [eₙ]
   // for the wave port of the given index. The transformed variables are related to the true
   // field by Eₜ = eₜ and Eₙ = eₙ / ikₙ. We will actually solve the shift-and-inverse
-  // problem (A - σ B)⁻¹ B e = λ e, with λ = 1 / (-kₙ² - σ).
+  // problem (A - σ B)⁻¹ B e = λ e, with λ = 1 / (-kₙ² - σ), on MPI_COMM_SELF.
   // Reference: Vardapetyan and Demkowicz, Full-wave analysis of dielectric waveguides at a
   //            given frequency, Math. Comput. (2003).
   // See also: Halla and Monk, On the analysis of waveguide modes in an electromagnetic
   //           transmission line, arXiv:2302.11994 (2023).
   double c_min = mat_op.GetLightSpeedMax().Min();
-  Mpi::GlobalMin(1, &c_min, nd_fespace.GetComm());
+  Mpi::GlobalMin(1, &c_min, comm);
   MFEM_VERIFY(c_min > 0.0 && c_min < mfem::infinity(),
               "Invalid material speed of light detected in WavePortOperator!");
   mu_eps_max = 1.0 / (c_min * c_min) * 1.1;  // Add a safety factor for maximum
                                              // propagation constant possible
-  std::tie(Atnr, Atni) = GetAtn(mat_op, *port_nd_fespace, *port_h1_fespace);
-  std::tie(Antr, Anti) = GetAnt(mat_op, *port_h1_fespace, *port_nd_fespace);
-  std::tie(Annr, Anni) = GetAnn(mat_op, *port_h1_fespace, port_normal);
+  if (Mpi::Rank(comm) == port_root)
   {
-    // The HypreParMatrix constructor from a SparseMatrix on each process does not copy
-    // the SparseMatrix data, but that's OK since this Dnn is copied in the block system
-    // matrix construction.
-    Vector d(port_h1_fespace->GetTrueVSize());
-    d.UseDevice(false);  // SparseMatrix constructor uses Vector on host
-    d = 0.0;
-    mfem::SparseMatrix diag(d);
-    auto Dnn = std::make_unique<mfem::HypreParMatrix>(
-        port_h1_fespace->GetComm(), port_h1_fespace->Get().GlobalTrueVSize(),
-        port_h1_fespace->Get().GetTrueDofOffsets(), &diag);
-    auto [Bttr, Btti] = GetBtt(mat_op, *port_nd_fespace);
-    auto [Br, Bi] = GetSystemMatrixB(Bttr.get(), Btti.get(), Dnn.get(), port_dbc_tdof_list);
-    opB = std::make_unique<ComplexWrapperOperator>(std::move(Br), std::move(Bi));
-  }
+    constexpr bool generate_edges = false, refine = true, fix_orientation = false;
+    std::istringstream fi(port_serial_mesh_data);
+    auto smesh = std::make_unique<mfem::Mesh>(fi, generate_edges, refine, fix_orientation);
+    mfem::Array<int> partitioning(smesh->GetNE());
+    partitioning = 0;
+    port_serial_mesh = std::make_unique<Mesh>(
+        std::make_unique<mfem::ParMesh>(MPI_COMM_SELF, *smesh, partitioning.GetData()));
 
-  // Configure a communicator for the processes which have elements for this port.
-  MPI_Comm comm = nd_fespace.GetComm();
-  int color = (port_nd_fespace->GetVSize() > 0 || port_h1_fespace->GetVSize() > 0)
-                  ? 0
-                  : MPI_UNDEFINED;
-  MPI_Comm_split(comm, color, Mpi::Rank(comm), &port_comm);
-  MFEM_VERIFY((color == 0 && port_comm != MPI_COMM_NULL) ||
-                  (color == MPI_UNDEFINED && port_comm == MPI_COMM_NULL),
-              "Unexpected error splitting communicator for wave port boundaries!");
-  port_root = (color == MPI_UNDEFINED) ? Mpi::Size(comm) : Mpi::Rank(comm);
-  Mpi::GlobalMin(1, &port_root, comm);
-  MFEM_VERIFY(port_root < Mpi::Size(comm), "No root process found for port!");
+    port_serial_nd_fec = std::make_unique<mfem::ND_FECollection>(
+        nd_fespace.GetMaxElementOrder(), port_serial_mesh->Dimension());
+    port_serial_h1_fec = std::make_unique<mfem::H1_FECollection>(
+        h1_fespace.GetMaxElementOrder(), port_serial_mesh->Dimension());
+    port_serial_nd_fespace =
+        std::make_unique<FiniteElementSpace>(*port_serial_mesh, port_serial_nd_fec.get());
+    port_serial_h1_fespace =
+        std::make_unique<FiniteElementSpace>(*port_serial_mesh, port_serial_h1_fec.get());
 
-  // Configure the eigenvalue problem solver. As for the full 3D case, the system matrices
-  // are in general complex and symmetric. We supply the operators to the solver in
-  // shift-inverted form and handle the back-transformation externally.
-  if (port_comm != MPI_COMM_NULL)
-  {
+    {
+      mfem::Array<int> dbc_marker, serial_nd_dbc_tdof_list, serial_h1_dbc_tdof_list;
+      mesh::AttrToMarker(port_serial_mesh->Get().bdr_attributes.Size()
+                             ? port_serial_mesh->Get().bdr_attributes.Max()
+                             : 0,
+                         dbc_attr, dbc_marker);
+      port_serial_nd_fespace->Get().GetEssentialTrueDofs(dbc_marker,
+                                                         serial_nd_dbc_tdof_list);
+      port_serial_h1_fespace->Get().GetEssentialTrueDofs(dbc_marker,
+                                                         serial_h1_dbc_tdof_list);
+      int nd_tdof_offset = port_serial_nd_fespace->GetTrueVSize();
+      port_serial_dbc_tdof_list.Reserve(serial_nd_dbc_tdof_list.Size() +
+                                        serial_h1_dbc_tdof_list.Size());
+      for (auto tdof : serial_nd_dbc_tdof_list)
+      {
+        port_serial_dbc_tdof_list.Append(tdof);
+      }
+      for (auto tdof : serial_h1_dbc_tdof_list)
+      {
+        port_serial_dbc_tdof_list.Append(tdof + nd_tdof_offset);
+      }
+    }
+
+    GetInitialSpace(port_serial_nd_fespace->Get(), port_serial_h1_fespace->Get(),
+                    port_serial_dbc_tdof_list, v0);
+    e0.SetSize(port_serial_nd_fespace->GetTrueVSize() + port_serial_h1_fespace->GetTrueVSize());
+    e0.UseDevice(true);
+
+    std::tie(Atnr, Atni) = GetAtn(mat_op, *port_serial_nd_fespace, *port_serial_h1_fespace);
+    std::tie(Antr, Anti) = GetAnt(mat_op, *port_serial_h1_fespace, *port_serial_nd_fespace);
+    std::tie(Annr, Anni) = GetAnn(mat_op, *port_serial_h1_fespace, port_normal);
+    {
+      Vector d(port_serial_h1_fespace->GetTrueVSize());
+      d.UseDevice(false);  // SparseMatrix constructor uses Vector on host
+      d = 0.0;
+      mfem::SparseMatrix diag(d);
+      auto Dnn = std::make_unique<mfem::HypreParMatrix>(
+          port_serial_h1_fespace->GetComm(), port_serial_h1_fespace->Get().GlobalTrueVSize(),
+          port_serial_h1_fespace->Get().GetTrueDofOffsets(), &diag);
+      auto [Bttr, Btti] = GetBtt(mat_op, *port_serial_nd_fespace);
+      auto [Br, Bi] = GetSystemMatrixB(Bttr.get(), Btti.get(), Dnn.get(),
+                                       port_serial_dbc_tdof_list);
+      opB = std::make_unique<ComplexWrapperOperator>(std::move(Br), std::move(Bi));
+    }
+
     // Define the linear solver to be used for solving systems associated with the
     // generalized eigenvalue problem.
-    auto gmres = std::make_unique<GmresSolver<ComplexOperator>>(port_comm, data.verbose);
+    auto gmres = std::make_unique<GmresSolver<ComplexOperator>>(MPI_COMM_SELF, data.verbose);
     gmres->SetInitialGuess(false);
     gmres->SetRelTol(data.ksp_tol);
     gmres->SetMaxIter(data.ksp_max_its);
@@ -703,7 +681,8 @@ WavePortData::WavePortData(const config::WavePortData &data,
           {
 #if defined(MFEM_USE_SUPERLU)
             auto slu = std::make_unique<SuperLUSolver>(
-                port_comm, SymbolicFactorization::DEFAULT, false, true, data.verbose - 1);
+                MPI_COMM_SELF, SymbolicFactorization::DEFAULT, false, true,
+                data.verbose - 1);
             // slu->GetSolver().SetColumnPermutation(mfem::superlu::MMD_AT_PLUS_A);
             return slu;
 #endif
@@ -712,8 +691,8 @@ WavePortData::WavePortData(const config::WavePortData &data,
           {
 #if defined(MFEM_USE_STRUMPACK)
             auto strumpack = std::make_unique<StrumpackSolver>(
-                port_comm, SymbolicFactorization::DEFAULT, SparseCompression::NONE, 0.0, 0,
-                0, true, data.verbose - 1);
+                MPI_COMM_SELF, SymbolicFactorization::DEFAULT, SparseCompression::NONE,
+                0.0, 0, 0, true, data.verbose - 1);
             // strumpack->SetReorderingStrategy(strumpack::ReorderingStrategy::AMD);
             return strumpack;
 #endif
@@ -722,8 +701,8 @@ WavePortData::WavePortData(const config::WavePortData &data,
           {
 #if defined(MFEM_USE_MUMPS)
             auto mumps = std::make_unique<MumpsSolver>(
-                port_comm, mfem::MUMPSSolver::UNSYMMETRIC, SymbolicFactorization::DEFAULT,
-                0.0, true, data.verbose - 1);
+                MPI_COMM_SELF, mfem::MUMPSSolver::UNSYMMETRIC,
+                SymbolicFactorization::DEFAULT, 0.0, true, data.verbose - 1);
             // mumps->SetReorderingStrategy(mfem::MUMPSSolver::AMD);
             return mumps;
 #endif
@@ -764,13 +743,13 @@ WavePortData::WavePortData(const config::WavePortData &data,
     if (type == EigenSolverBackend::ARPACK)
     {
 #if defined(PALACE_WITH_ARPACK)
-      eigen = std::make_unique<arpack::ArpackEPSSolver>(port_comm, print);
+      eigen = std::make_unique<arpack::ArpackEPSSolver>(MPI_COMM_SELF, print);
 #endif
     }
     else  // EigenSolverBackend::SLEPC
     {
 #if defined(PALACE_WITH_SLEPC)
-      auto slepc = std::make_unique<slepc::SlepcEPSSolver>(port_comm, print);
+      auto slepc = std::make_unique<slepc::SlepcEPSSolver>(MPI_COMM_SELF, print);
       slepc->SetType(slepc::SlepcEigenvalueSolver::Type::KRYLOVSCHUR);
       slepc->SetProblemType(slepc::SlepcEigenvalueSolver::ProblemType::GEN_NON_HERMITIAN);
       eigen = std::move(slepc);
@@ -837,13 +816,9 @@ WavePortData::WavePortData(const config::WavePortData &data,
 
 WavePortData::~WavePortData()
 {
-  // Free the solvers before the communicator on which they are based.
+  // Free the solvers before the associated operator storage.
   ksp.reset();
   eigen.reset();
-  if (port_comm != MPI_COMM_NULL)
-  {
-    MPI_Comm_free(&port_comm);
-  }
 }
 
 void WavePortData::Initialize(double omega)
@@ -854,24 +829,29 @@ void WavePortData::Initialize(double omega)
   }
 
   // Construct matrices and solve the generalized eigenvalue problem for the desired wave
-  // port mode. The B matrix is operating frequency-independent and has already been
-  // constructed.
-  std::unique_ptr<ComplexOperator> opA;
+  // port mode on port_root only. The B matrix is operating frequency-independent and has
+  // already been constructed.
+  MPI_Comm comm = port_mesh->GetComm();
+  const int rank = Mpi::Rank(comm);
   const double sigma = -omega * omega * mu_eps_max;
+  std::complex<double> lambda = 0.0;
+  Vector root_e0tr, root_e0ti, root_e0nr, root_e0ni;
+  if (rank == port_root)
   {
-    auto [Attr, Atti] = GetAtt(mat_op, *port_nd_fespace, port_normal, omega, sigma);
-    auto [Ar, Ai] =
-        GetSystemMatrixA(Attr.get(), Atti.get(), Atnr.get(), Atni.get(), Antr.get(),
-                         Anti.get(), Annr.get(), Anni.get(), port_dbc_tdof_list);
-    opA = std::make_unique<ComplexWrapperOperator>(std::move(Ar), std::move(Ai));
-  }
+    MFEM_VERIFY(port_serial_nd_fespace && port_serial_h1_fespace && eigen && ksp && opB,
+                "Missing serial wave port solve context on root process!");
+    std::unique_ptr<ComplexOperator> opA;
+    {
+      auto [Attr, Atti] = GetAtt(mat_op, *port_serial_nd_fespace, port_normal, omega, sigma);
+      auto [Ar, Ai] =
+          GetSystemMatrixA(Attr.get(), Atti.get(), Atnr.get(), Atni.get(), Antr.get(),
+                           Anti.get(), Annr.get(), Anni.get(), port_serial_dbc_tdof_list);
+      opA = std::make_unique<ComplexWrapperOperator>(std::move(Ar), std::move(Ai));
+    }
 
-  // Configure and solve the (inverse) eigenvalue problem for the desired boundary mode.
-  // Linear solves are preconditioned with the real part of the system matrix (ignore loss
-  // tangent).
-  std::complex<double> lambda;
-  if (port_comm != MPI_COMM_NULL)
-  {
+    // Configure and solve the (inverse) eigenvalue problem for the desired boundary mode.
+    // Linear solves are preconditioned with the real part of the system matrix (ignore
+    // loss tangent).
     ComplexWrapperOperator opP(opA->Real(), nullptr);  // Non-owning constructor
     ksp->SetOperators(*opA, opP);
     eigen->SetOperators(*opB, *opA, EigenvalueSolver::ScaleType::NONE);
@@ -879,60 +859,202 @@ void WavePortData::Initialize(double omega)
     int num_conv = eigen->Solve();
     MFEM_VERIFY(num_conv >= mode_idx, "Wave port eigensolver did not converge!");
     lambda = eigen->GetEigenvalue(mode_idx - 1);
-    // Mpi::Print(port_comm, " ... Wave port eigensolver error = {} (bkwd), {} (abs)\n",
+    // Mpi::Print(MPI_COMM_SELF, " ... Wave port eigensolver error = {} (bkwd), {} (abs)\n",
     //            eigen->GetError(mode_idx - 1, EigenvalueSolver::ErrorType::BACKWARD),
     //            eigen->GetError(mode_idx - 1, EigenvalueSolver::ErrorType::ABSOLUTE));
+
+    eigen->GetEigenvector(mode_idx - 1, e0);
+    linalg::NormalizePhase(MPI_COMM_SELF, e0);
+    e0.Real().Read();
+    e0.Imag().Read();
+    const int serial_nd_true_size = port_serial_nd_fespace->GetTrueVSize();
+    const int serial_h1_true_size = port_serial_h1_fespace->GetTrueVSize();
+    Vector e0tr(e0.Real(), 0, serial_nd_true_size);
+    Vector e0nr(e0.Real(), serial_nd_true_size, serial_h1_true_size);
+    Vector e0ti(e0.Imag(), 0, serial_nd_true_size);
+    Vector e0ni(e0.Imag(), serial_nd_true_size, serial_h1_true_size);
+    root_e0tr = e0tr;
+    root_e0nr = e0nr;
+    root_e0ti = e0ti;
+    root_e0ni = e0ni;
   }
-  Mpi::Broadcast(1, &lambda, port_root, port_mesh->GetComm());
+  Mpi::Broadcast(1, &lambda, port_root, comm);
 
   // Extract the eigenmode solution and postprocess. The extracted eigenvalue is λ =
   // 1 / (-kₙ² - σ).
   constexpr double tol = 10.0 * std::numeric_limits<double>::epsilon();
-  MFEM_VERIFY(std::abs(lambda) > tol, "Wave port eigensolver produced near-zero eigenvalue!");
+  MFEM_VERIFY(std::isfinite(lambda.real()) && std::isfinite(lambda.imag()) &&
+                  std::abs(lambda) > tol,
+              "Wave port eigensolver produced invalid eigenvalue for mode "
+                  << mode_idx << " at omega = " << omega << " (lambda = " << lambda
+                  << ")!");
   kn0 = std::sqrt(-sigma - 1.0 / lambda);
-  omega0 = omega;
+  MFEM_VERIFY(std::isfinite(kn0.real()) && std::isfinite(kn0.imag()),
+              "Wave port eigensolver produced invalid propagation constant for mode "
+                  << mode_idx << " at omega = " << omega << " (lambda = " << lambda
+                  << ", kn0 = " << kn0 << ")!");
 
-  // Separate the computed field out into eₜ and eₙ and and transform back to true
-  // electric field variables: Eₜ = eₜ and Eₙ = eₙ / ikₙ.
+  // Transform the serial root eigenvector back to true electric field variables:
+  // Eₜ = eₜ and Eₙ = eₙ / ikₙ.
+  std::vector<double> e0tr_data, e0ti_data, e0nr_data, e0ni_data;
+  int serial_nd_true_size = 0, serial_h1_true_size = 0;
+  if (rank == port_root)
   {
-    if (port_comm != MPI_COMM_NULL)
-    {
-      eigen->GetEigenvector(mode_idx - 1, e0);
-      linalg::NormalizePhase(port_comm, e0);
-    }
-    else
-    {
-      MFEM_ASSERT(e0.Size() == 0,
-                  "Unexpected non-empty port FE space in wave port boundary mode solve!");
-    }
-    e0.Real().Read();  // Ensure memory is allocated on device before aliasing
-    e0.Imag().Read();
-    Vector e0tr(e0.Real(), 0, port_nd_fespace->GetTrueVSize());
-    Vector e0nr(e0.Real(), port_nd_fespace->GetTrueVSize(),
-                port_h1_fespace->GetTrueVSize());
-    Vector e0ti(e0.Imag(), 0, port_nd_fespace->GetTrueVSize());
-    Vector e0ni(e0.Imag(), port_nd_fespace->GetTrueVSize(),
-                port_h1_fespace->GetTrueVSize());
-    e0tr.UseDevice(true);
-    e0nr.UseDevice(true);
-    e0ti.UseDevice(true);
-    e0ni.UseDevice(true);
     if (std::abs(kn0) > tol)
     {
-      ComplexVector::AXPBY(1.0 / (1i * kn0), e0nr, e0ni, 0.0, e0nr, e0ni);
+      root_e0tr.UseDevice(true);
+      root_e0ti.UseDevice(true);
+      root_e0nr.UseDevice(true);
+      root_e0ni.UseDevice(true);
+      ComplexVector::AXPBY(1.0 / (1i * kn0), root_e0nr, root_e0ni, 0.0, root_e0nr,
+                           root_e0ni);
     }
     else
     {
       MFEM_WARNING("Encountered near-zero wave port propagation constant; setting "
                    "longitudinal field component to zero during normalization!");
-      e0nr = 0.0;
-      e0ni = 0.0;
+      root_e0nr = 0.0;
+      root_e0ni = 0.0;
     }
-    port_E0t->Real().SetFromTrueDofs(e0tr);  // Parallel distribute
-    port_E0t->Imag().SetFromTrueDofs(e0ti);
-    port_E0n->Real().SetFromTrueDofs(e0nr);
-    port_E0n->Imag().SetFromTrueDofs(e0ni);
+
+    serial_nd_true_size = root_e0tr.Size();
+    serial_h1_true_size = root_e0nr.Size();
+    const auto *h_e0tr = root_e0tr.HostRead();
+    const auto *h_e0ti = root_e0ti.HostRead();
+    const auto *h_e0nr = root_e0nr.HostRead();
+    const auto *h_e0ni = root_e0ni.HostRead();
+    e0tr_data.assign(h_e0tr, h_e0tr + serial_nd_true_size);
+    e0ti_data.assign(h_e0ti, h_e0ti + serial_nd_true_size);
+    e0nr_data.assign(h_e0nr, h_e0nr + serial_h1_true_size);
+    e0ni_data.assign(h_e0ni, h_e0ni + serial_h1_true_size);
   }
+  Mpi::Broadcast(1, &serial_nd_true_size, port_root, comm);
+  Mpi::Broadcast(1, &serial_h1_true_size, port_root, comm);
+  if (rank != port_root)
+  {
+    e0tr_data.resize(serial_nd_true_size);
+    e0ti_data.resize(serial_nd_true_size);
+    e0nr_data.resize(serial_h1_true_size);
+    e0ni_data.resize(serial_h1_true_size);
+  }
+  if (serial_nd_true_size > 0)
+  {
+    Mpi::Broadcast(serial_nd_true_size, e0tr_data.data(), port_root, comm);
+    Mpi::Broadcast(serial_nd_true_size, e0ti_data.data(), port_root, comm);
+  }
+  if (serial_h1_true_size > 0)
+  {
+    Mpi::Broadcast(serial_h1_true_size, e0nr_data.data(), port_root, comm);
+    Mpi::Broadcast(serial_h1_true_size, e0ni_data.data(), port_root, comm);
+  }
+
+  // Reconstruct serial mode fields on each rank and map onto the distributed port submesh
+  // fields using element-by-element DOF transfer. This offset logic relies on MFEM's
+  // current ParMesh::GetSerialMesh(save_rank) implementation ordering elements as
+  // [save_rank, 0, 1, ..., save_rank-1, save_rank+1, ..., NRanks-1]. Keep this in sync
+  // with MFEM mesh/pmesh.cpp if GetSerialMesh ordering changes in a future MFEM release.
+  {
+    const int size = Mpi::Size(comm);
+    int local_ne = port_mesh->Get().GetNE();
+    std::vector<int> all_ne(size);
+    MPI_Allgather(&local_ne, 1, MPI_INT, all_ne.data(), 1, MPI_INT, comm);
+    int elem_offset;
+    if (rank == port_root)
+    {
+      elem_offset = 0;
+    }
+    else
+    {
+      elem_offset = all_ne[port_root];
+      for (int r = 0; r < rank; r++)
+      {
+        if (r != port_root)
+        {
+          elem_offset += all_ne[r];
+        }
+      }
+    }
+
+    constexpr bool generate_edges = false, refine = true, fix_orientation = false;
+    std::istringstream fi(port_serial_mesh_data);
+    mfem::Mesh serial_port_mesh(fi, generate_edges, refine, fix_orientation);
+    mfem::ND_FECollection serial_nd_fec(port_nd_fespace->GetMaxElementOrder(),
+                                        serial_port_mesh.Dimension());
+    mfem::H1_FECollection serial_h1_fec(port_h1_fespace->GetMaxElementOrder(),
+                                        serial_port_mesh.Dimension());
+    mfem::FiniteElementSpace serial_nd_fespace(&serial_port_mesh, &serial_nd_fec);
+    mfem::FiniteElementSpace serial_h1_fespace(&serial_port_mesh, &serial_h1_fec);
+    MFEM_VERIFY(serial_nd_fespace.GetTrueVSize() == serial_nd_true_size &&
+                    serial_h1_fespace.GetTrueVSize() == serial_h1_true_size,
+                "Serial wave port mode data size mismatch during distributed mapping!");
+
+    Vector serial_tnd_r(serial_nd_true_size), serial_tnd_i(serial_nd_true_size),
+        serial_th1_r(serial_h1_true_size), serial_th1_i(serial_h1_true_size);
+    for (int i = 0; i < serial_nd_true_size; i++)
+    {
+      serial_tnd_r(i) = e0tr_data[i];
+      serial_tnd_i(i) = e0ti_data[i];
+    }
+    for (int i = 0; i < serial_h1_true_size; i++)
+    {
+      serial_th1_r(i) = e0nr_data[i];
+      serial_th1_i(i) = e0ni_data[i];
+    }
+
+    mfem::GridFunction serial_E0tr(&serial_nd_fespace), serial_E0ti(&serial_nd_fespace),
+        serial_E0nr(&serial_h1_fespace), serial_E0ni(&serial_h1_fespace);
+    serial_E0tr.SetFromTrueDofs(serial_tnd_r);
+    serial_E0ti.SetFromTrueDofs(serial_tnd_i);
+    serial_E0nr.SetFromTrueDofs(serial_th1_r);
+    serial_E0ni.SetFromTrueDofs(serial_th1_i);
+
+    // Transfer DOFs element-by-element. GetSubVector/SetSubVector handle DOF sign
+    // conventions (edge orientations for ND) correctly via signed VDof indices.
+    mfem::Array<int> s_vdofs, p_vdofs;
+    mfem::Vector loc_data;
+    for (int j = 0; j < local_ne; j++)
+    {
+      const int e_serial = elem_offset + j;
+
+      // ND (tangential field).
+      serial_nd_fespace.GetElementVDofs(e_serial, s_vdofs);
+      port_nd_fespace->Get().GetElementVDofs(j, p_vdofs);
+      serial_E0tr.GetSubVector(s_vdofs, loc_data);
+      port_E0t->Real().SetSubVector(p_vdofs, loc_data);
+      serial_E0ti.GetSubVector(s_vdofs, loc_data);
+      port_E0t->Imag().SetSubVector(p_vdofs, loc_data);
+
+      // H1 (normal field).
+      serial_h1_fespace.GetElementVDofs(e_serial, s_vdofs);
+      port_h1_fespace->Get().GetElementVDofs(j, p_vdofs);
+      serial_E0nr.GetSubVector(s_vdofs, loc_data);
+      port_E0n->Real().SetSubVector(p_vdofs, loc_data);
+      serial_E0ni.GetSubVector(s_vdofs, loc_data);
+      port_E0n->Imag().SetSubVector(p_vdofs, loc_data);
+    }
+  }
+
+  // Validate the distributed eigenvector after extraction/mapping.
+  {
+    const int nd_true_size = port_nd_fespace->GetTrueVSize();
+    const int h1_true_size = port_h1_fespace->GetTrueVSize();
+    ComplexVector e0_mode(nd_true_size + h1_true_size);
+    e0_mode.UseDevice(true);
+    Vector e0tr(e0_mode.Real(), 0, nd_true_size);
+    Vector e0nr(e0_mode.Real(), nd_true_size, h1_true_size);
+    Vector e0ti(e0_mode.Imag(), 0, nd_true_size);
+    Vector e0ni(e0_mode.Imag(), nd_true_size, h1_true_size);
+    port_E0t->Real().ParallelProject(e0tr);
+    port_E0t->Imag().ParallelProject(e0ti);
+    port_E0n->Real().ParallelProject(e0nr);
+    port_E0n->Imag().ParallelProject(e0ni);
+    const double evec_norm = linalg::Norml2(comm, e0_mode);
+    MFEM_VERIFY(std::isfinite(evec_norm) && evec_norm > tol,
+                "Wave port eigensolver produced invalid eigenvector norm for mode "
+                    << mode_idx << " at omega = " << omega << " (|e| = " << evec_norm
+                    << ", lambda = " << lambda << ", kn0 = " << kn0 << ")!");
+  }
+  omega0 = omega;
 
   // Configure the linear forms for computing S-parameters (projection of the field onto the
   // port mode). Normalize the mode for a chosen polarization direction and unit power,

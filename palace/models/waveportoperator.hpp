@@ -7,6 +7,7 @@
 #include <complex>
 #include <map>
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <mfem.hpp>
 #include "fem/fespace.hpp"
@@ -62,16 +63,19 @@ private:
   std::unique_ptr<FiniteElementSpace> port_nd_fespace, port_h1_fespace;
   std::unique_ptr<mfem::ParTransferMap> port_nd_transfer, port_h1_transfer;
   std::unordered_map<int, int> submesh_parent_elems;
-  mfem::Array<int> port_dbc_tdof_list;
   double mu_eps_max;
 
   // Operator storage for repeated boundary mode eigenvalue problem solves.
   std::unique_ptr<mfem::HypreParMatrix> Atnr, Atni, Antr, Anti, Annr, Anni;
   std::unique_ptr<ComplexOperator> opB;
+  std::unique_ptr<Mesh> port_serial_mesh;
+  std::unique_ptr<mfem::FiniteElementCollection> port_serial_nd_fec, port_serial_h1_fec;
+  std::unique_ptr<FiniteElementSpace> port_serial_nd_fespace, port_serial_h1_fespace;
+  mfem::Array<int> port_serial_dbc_tdof_list;
+  std::string port_serial_mesh_data;
   ComplexVector v0, e0;
 
   // Eigenvalue solver for boundary modes.
-  MPI_Comm port_comm;
   int port_root;
   std::unique_ptr<EigenvalueSolver> eigen;
   std::unique_ptr<ComplexKspSolver> ksp;
