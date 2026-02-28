@@ -44,6 +44,10 @@ private:
 
   void SetUpMaterialProperties(const IoData &iodata, const mfem::ParMesh &mesh);
   void SetUpFloquetWaveVector(const IoData &iodata, const mfem::ParMesh &mesh);
+  void UpdatePermittivityDerived(int k, const mfem::DenseMatrix &prev_epsilon);
+  void UpdatePermittivityDerivedNoFlags(int k, const mfem::DenseMatrix &prev_epsilon);
+  void UpdateMaterialFlags();
+  void UpdateIsotropy(int k);
 
   // Map from an attribute (specified on a mesh) to a material index (location in the
   // property vector).
@@ -74,6 +78,7 @@ public:
   auto GetInvImpedance(int attr) const { return Wrap(mat_invz0, attr); }
   auto GetLightSpeed(int attr) const { return Wrap(mat_c0, attr); }
   auto GetConductivity(int attr) const { return Wrap(mat_sigma, attr); }
+  auto GetConductivityReal(int attr) const { return Wrap(mat_sigma, attr); }
   auto GetInvLondonDepth(int attr) const { return Wrap(mat_invLondon, attr); }
   auto GetFloquetCurl(int attr) const { return Wrap(mat_muinvkx, attr); }
   auto GetFloquetMass(int attr) const { return Wrap(mat_kxTmuinvkx, attr); }
@@ -91,6 +96,7 @@ public:
   const auto &GetInvImpedance() const { return mat_invz0; }
   const auto &GetLightSpeed() const { return mat_c0; }
   const auto &GetConductivity() const { return mat_sigma; }
+  const auto &GetConductivityReal() const { return mat_sigma; }
   const auto &GetInvLondonDepth() const { return mat_invLondon; }
   const auto &GetFloquetCurl() const { return mat_muinvkx; }
   const auto &GetFloquetMass() const { return mat_kxTmuinvkx; }
@@ -103,6 +109,17 @@ public:
   bool HasConductivity() const { return has_conductivity_attr; }
   bool HasLondonDepth() const { return has_london_attr; }
   bool HasWaveVector() const { return has_wave_attr; }
+
+  void UpdatePermittivityReal(int attr, double eps);
+  void UpdatePermittivityReal(int attr, const mfem::DenseMatrix &eps);
+  void UpdateConductivityReal(int attr, double sigma);
+  void UpdateConductivityReal(int attr, const mfem::DenseMatrix &sigma);
+  void UpdatePermittivityNSquared(const mfem::Array<int> &attr_list,
+                                  const mfem::Vector &rho_hat, double n_low,
+                                  double n_high);
+  void UpdateConductivityLogLinear(const mfem::Array<int> &attr_list,
+                                   const mfem::Vector &rho_hat, double sigma_d,
+                                   double sigma_m, double sigma_0);
 
   const auto &GetAttributeToMaterial() const { return attr_mat; }
   mfem::Array<int> GetBdrAttributeToMaterial() const;

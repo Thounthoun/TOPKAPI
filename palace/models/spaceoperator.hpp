@@ -127,6 +127,7 @@ public:
   }
 
   // Return material operator for postprocessing.
+  auto &GetMaterialOp() { return mat_op; }
   const MaterialOperator &GetMaterialOp() const { return mat_op; }
 
   // Access to underlying BC operator objects for postprocessing.

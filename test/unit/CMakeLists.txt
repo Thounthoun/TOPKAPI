@@ -39,6 +39,12 @@ add_executable(unit-tests
   ${CMAKE_CURRENT_SOURCE_DIR}/test-schema.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test-strattonchu.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test-tablecsv.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test-topopt-filter.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test-topopt-forward.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test-topopt-gradient.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test-topopt-material.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test-topopt-projection.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test-topopt-volume.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test-vector.cpp
 )
 

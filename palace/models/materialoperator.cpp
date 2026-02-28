@@ -10,6 +10,7 @@
 #include "utils/communication.hpp"
 #include "utils/geodata.hpp"
 #include "utils/iodata.hpp"
+#include "utils/topopt.hpp"
 
 namespace palace
 {
@@ -90,6 +91,43 @@ mfem::DenseMatrix ToDenseMatrix(const config::SymmetricMatrixData<N> &data)
 }
 
 }  // namespace internal::mat
+
+namespace
+{
+
+bool IsScalarMatrix(const mfem::DenseMatrix &M)
+{
+  if (M.Height() != M.Width())
+  {
+    return false;
+  }
+  constexpr double tol = 1.0e-12;
+  const double d = M.Height() > 0 ? M(0, 0) : 0.0;
+  for (int i = 0; i < M.Height(); i++)
+  {
+    for (int j = 0; j < M.Width(); j++)
+    {
+      const double target = (i == j) ? d : 0.0;
+      if (std::abs(M(i, j) - target) > tol * (1.0 + std::abs(target)))
+      {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+void FillScalarMatrix(mfem::DenseMatrix &M, double value)
+{
+  MFEM_VERIFY(M.Height() == M.Width(), "Expected a square material property matrix!");
+  M = 0.0;
+  for (int i = 0; i < M.Height(); i++)
+  {
+    M(i, i) = value;
+  }
+}
+
+}  // namespace
 
 MaterialOperator::MaterialOperator(const IoData &iodata, const Mesh &mesh) : mesh(mesh)
 {
@@ -308,6 +346,167 @@ void MaterialOperator::SetUpMaterialProperties(const IoData &iodata,
   has_conductivity_attr = has_attr[1];
   has_london_attr = has_attr[2];
   has_wave_attr = has_attr[3];
+}
+
+void MaterialOperator::UpdatePermittivityDerivedNoFlags(int k,
+                                                         const mfem::DenseMatrix &prev_epsilon)
+{
+  MFEM_VERIFY(k >= 0 && k < mat_epsilon.SizeK(), "Invalid material index for permittivity!");
+
+  const int sdim = SpaceDimension();
+  mfem::DenseMatrix T(sdim, sdim);
+  mfem::DenseMatrix tandelta(sdim, sdim);
+  tandelta = 0.0;
+
+  if (mat_epsilon_imag(k).MaxMaxNorm() > 0.0)
+  {
+    mfem::DenseMatrix inv_prev_eps(sdim, sdim);
+    mfem::DenseMatrixInverse(prev_epsilon, true).GetInverseMatrix(inv_prev_eps);
+    Mult(inv_prev_eps, mat_epsilon_imag(k), tandelta);
+    tandelta *= -1.0;
+  }
+
+  // Preserve the existing loss tangent by recomputing Im{epsilon} = -epsilon * tan(delta).
+  Mult(mat_epsilon(k), tandelta, T);
+  T *= -1.0;
+  mat_epsilon_imag(k).Set(1.0, T);
+
+  // epsilon * sqrt(I + tan(delta) * tan(delta)^T)
+  MultAAt(tandelta, T);
+  for (int d = 0; d < T.Height(); d++)
+  {
+    T(d, d) += 1.0;
+  }
+  Mult(mat_epsilon(k), linalg::MatrixSqrt(T), mat_epsilon_abs(k));
+
+  // sqrt(mu^{-1} epsilon)
+  Mult(mat_muinv(k), mat_epsilon(k), mat_invz0(k));
+  mat_invz0(k).Set(1.0, linalg::MatrixSqrt(mat_invz0(k)));
+
+  // sqrt((mu epsilon)^{-1})
+  mfem::DenseMatrix mat_mu(sdim, sdim);
+  mfem::DenseMatrixInverse(mat_muinv(k), true).GetInverseMatrix(mat_mu);
+  Mult(mat_mu, mat_epsilon(k), T);
+  mat_c0(k).Set(1.0, linalg::MatrixPow(T, -0.5));
+  mat_c0_min[k] = linalg::SingularValueMin(mat_c0(k));
+  mat_c0_max[k] = linalg::SingularValueMax(mat_c0(k));
+
+  UpdateIsotropy(k);
+}
+
+void MaterialOperator::UpdatePermittivityDerived(int k, const mfem::DenseMatrix &prev_epsilon)
+{
+  UpdatePermittivityDerivedNoFlags(k, prev_epsilon);
+  UpdateMaterialFlags();
+}
+
+void MaterialOperator::UpdateMaterialFlags()
+{
+  has_losstan_attr = has_conductivity_attr = has_london_attr = false;
+  for (int k = 0; k < mat_epsilon_imag.SizeK(); k++)
+  {
+    has_losstan_attr = has_losstan_attr || (mat_epsilon_imag(k).MaxMaxNorm() > 0.0);
+    has_conductivity_attr = has_conductivity_attr || (mat_sigma(k).MaxMaxNorm() > 0.0);
+    has_london_attr = has_london_attr || (mat_invLondon(k).MaxMaxNorm() > 0.0);
+  }
+
+  bool has_attr[4] = {has_losstan_attr, has_conductivity_attr, has_london_attr,
+                      has_wave_attr};
+  Mpi::GlobalOr(4, has_attr, mesh.GetComm());
+  has_losstan_attr = has_attr[0];
+  has_conductivity_attr = has_attr[1];
+  has_london_attr = has_attr[2];
+  has_wave_attr = has_attr[3];
+}
+
+void MaterialOperator::UpdateIsotropy(int k)
+{
+  MFEM_VERIFY(k >= 0 && k < attr_is_isotropic.Size(), "Invalid material index for isotropy!");
+  attr_is_isotropic[k] = IsScalarMatrix(mat_muinv(k)) && IsScalarMatrix(mat_epsilon(k)) &&
+                         IsScalarMatrix(mat_epsilon_imag(k)) && IsScalarMatrix(mat_sigma(k));
+}
+
+void MaterialOperator::UpdatePermittivityReal(int attr, double eps)
+{
+  MFEM_VERIFY(std::isfinite(eps) && eps > 0.0,
+              "Permittivity update must be finite and positive!");
+  mfem::DenseMatrix eps_mat(SpaceDimension(), SpaceDimension());
+  FillScalarMatrix(eps_mat, eps);
+  UpdatePermittivityReal(attr, eps_mat);
+}
+
+void MaterialOperator::UpdatePermittivityReal(int attr, const mfem::DenseMatrix &eps)
+{
+  MFEM_VERIFY(eps.Height() == SpaceDimension() && eps.Width() == SpaceDimension(),
+              "Permittivity update has invalid dimensions!");
+
+  const int k = AttrToMat(attr);
+  const mfem::DenseMatrix prev_epsilon(mat_epsilon(k));
+  mat_epsilon(k).Set(1.0, eps);
+  UpdatePermittivityDerived(k, prev_epsilon);
+}
+
+void MaterialOperator::UpdateConductivityReal(int attr, double sigma)
+{
+  MFEM_VERIFY(std::isfinite(sigma) && sigma >= 0.0,
+              "Conductivity update must be finite and non-negative!");
+  mfem::DenseMatrix sigma_mat(SpaceDimension(), SpaceDimension());
+  FillScalarMatrix(sigma_mat, sigma);
+  UpdateConductivityReal(attr, sigma_mat);
+}
+
+void MaterialOperator::UpdateConductivityReal(int attr, const mfem::DenseMatrix &sigma)
+{
+  MFEM_VERIFY(sigma.Height() == SpaceDimension() && sigma.Width() == SpaceDimension(),
+              "Conductivity update has invalid dimensions!");
+
+  const int k = AttrToMat(attr);
+  mat_sigma(k).Set(1.0, sigma);
+  UpdateMaterialFlags();
+  UpdateIsotropy(k);
+}
+
+void MaterialOperator::UpdatePermittivityNSquared(const mfem::Array<int> &attr_list,
+                                                  const mfem::Vector &rho_hat,
+                                                  double n_low, double n_high)
+{
+  MFEM_VERIFY(attr_list.Size() == rho_hat.Size(),
+              "Permittivity update requires matching attribute and density sizes!");
+  for (int i = 0; i < attr_list.Size(); i++)
+  {
+    const double eps = topopt::InterpolatePermittivityNSquared(rho_hat(i), n_low, n_high);
+    MFEM_VERIFY(std::isfinite(eps) && eps > 0.0,
+                "Permittivity update must be finite and positive!");
+    const int k = AttrToMat(attr_list[i]);
+    const mfem::DenseMatrix prev_epsilon(mat_epsilon(k));
+    mfem::DenseMatrix eps_mat(SpaceDimension(), SpaceDimension());
+    FillScalarMatrix(eps_mat, eps);
+    mat_epsilon(k).Set(1.0, eps_mat);
+    UpdatePermittivityDerivedNoFlags(k, prev_epsilon);
+  }
+  UpdateMaterialFlags();
+}
+
+void MaterialOperator::UpdateConductivityLogLinear(const mfem::Array<int> &attr_list,
+                                                   const mfem::Vector &rho_hat,
+                                                   double sigma_d, double sigma_m,
+                                                   double sigma_0)
+{
+  MFEM_VERIFY(attr_list.Size() == rho_hat.Size(),
+              "Conductivity update requires matching attribute and density sizes!");
+  for (int i = 0; i < attr_list.Size(); i++)
+  {
+    const double sigma =
+        topopt::InterpolateConductivityLogLinear(rho_hat(i), sigma_d, sigma_m, sigma_0);
+    MFEM_VERIFY(std::isfinite(sigma) && sigma >= 0.0,
+                "Conductivity update must be finite and non-negative!");
+    const int k = AttrToMat(attr_list[i]);
+    mfem::DenseMatrix sigma_mat(SpaceDimension(), SpaceDimension());
+    FillScalarMatrix(sigma_mat, sigma);
+    mat_sigma(k).Set(1.0, sigma_mat);
+    UpdateIsotropy(k);
+  }
+  UpdateMaterialFlags();
 }
 
 void MaterialOperator::SetUpFloquetWaveVector(const IoData &iodata,
