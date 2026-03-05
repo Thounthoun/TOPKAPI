@@ -1,0 +1,1047 @@
+
+_____________     _______
+_____   __   \____ __   /____ ____________
+____   /_/  /  __ ` /  /  __ ` /  ___/  _ \
+___   _____/  /_/  /  /  /_/  /  /__/  ___/
+  /__/     \___,__/__/\___,__/\_____\_____/
+
+Git changeset ID: v0.15.0-203-g90bf39bf-dirty
+Running with 4 MPI processes
+Device configuration: cpu
+Memory configuration: host-std
+libCEED backend: /cpu/self/xsmm/blocked
+
+Finished partitioning mesh into 4 subdomains
+
+Characteristic length and time scales:
+ Lc = 1.400e-01 m, tc = 4.670e-01 ns
+
+Mesh curvature order: 2
+Mesh bounding box:
+ (Xmin, Ymin, Zmin) = (-1.500e-02, -9.000e-03, +0.000e+00) m
+ (Xmax, Ymax, Zmax) = (+1.500e-02, +9.000e-03, +1.400e-01) m
+
+Parallel Mesh Stats:
+
+                minimum     average     maximum       total
+ vertices           147         183         204         735
+ edges              857         930         970        3722
+ faces             1305        1335        1372        5342
+ elements           572         588         600        2354
+ neighbors            1           1           2
+
+            minimum     maximum
+ h        0.0217802   0.0563021
+ kappa      1.11723     7.66458
+
+Estimated current per-rank memory usage is: Min. 29.7M, Max. 32.9M, Avg. 30.5M, Total 122.2M
+Estimated current per-node memory usage is: Min. 122.8M, Max. 122.8M, Avg. 122.8M, Total 122.8M
+
+Configuring Robin impedance BC for wave ports at attributes:
+ 2: Index = 1, mode = 1, d = 0.000e+00 m,  n = (+0.0,+0.0,+1.0)
+ 3: Index = 2, mode = 1, d = 0.000e+00 m,  n = (+0.0,+0.0,-1.0)
+
+Configuring Dirichlet PEC BC at attributes:
+ 4
+
+Assembling system matrices, number of global unknowns:
+ H1 (p = 2): 4457, ND (p = 2): 18128, RT (p = 2): 23088
+ Operator assembly level: Partial
+ Mesh geometries:
+  Tetrahedron: P = 20, Q = 11 (quadrature order = 4)
+
+Calculating boundary modes at wave ports for ω/2π = 4.147e+01 GHz (1.937e+01)
+Wave port normalization: dot1_abs = 2.846745e-02, dot0_abs = 1.821855e-03, scale_magnitude = 5.926875e+00
+ Number of global unknowns for port 1:
+  H1: 93, ND: 206
+ Port 1, mode 1: kₙ = 2.184e+01+4.118e-14i m⁻¹
+Wave port normalization: dot1_abs = 6.958186e-02, dot0_abs = 6.345721e-03, scale_magnitude = 3.790984e+00
+ Number of global unknowns for port 2:
+  H1: 145, ND: 330
+ Port 2, mode 1: kₙ = 6.016e+01-2.146e-14i m⁻¹
+
+Calculating boundary modes at wave ports for ω/2π = 8.294e+01 GHz (3.873e+01)
+Wave port normalization: dot1_abs = 1.568079e-01, dot0_abs = 1.003536e-02, scale_magnitude = 2.525318e+00
+ Port 1, mode 1: kₙ = 2.406e+02+4.103e-11i m⁻¹
+Wave port normalization: dot1_abs = 1.428552e-01, dot0_abs = 1.302809e-02, scale_magnitude = 2.645770e+00
+ Port 2, mode 1: kₙ = 2.470e+02-1.555e-15i m⁻¹
+
+Calculating boundary modes at wave ports for ω/2π = 1.244e+02 GHz (5.810e+01)
+Wave port normalization: dot1_abs = 1.702706e-01, dot0_abs = 1.089694e-02, scale_magnitude = 2.423428e+00
+ Port 1, mode 1: kₙ = 3.919e+02+2.386e-07i m⁻¹
+Wave port normalization: dot1_abs = 1.526112e-01, dot0_abs = 1.391783e-02, scale_magnitude = 2.559804e+00
+ Port 2, mode 1: kₙ = 3.958e+02+3.595e-16i m⁻¹
+
+Configuring SLEPc eigenvalue solver:
+ Scaling γ = 1.627e+02, δ = 1.042e-03
+ Configuring divergence-free projection
+ Using random starting vector
+ Shift-and-invert σ = 6.600e+00 GHz (1.937e+01)
+
+Assembling multigrid hierarchy:
+
+Calculating boundary modes at wave ports for ω/2π = 4.147e+01 GHz (1.937e+01)
+Wave port normalization: dot1_abs = 2.846745e-02, dot0_abs = 1.821855e-03, scale_magnitude = 5.926875e+00
+ Port 1, mode 1: kₙ = 2.184e+01+4.118e-14i m⁻¹
+Wave port normalization: dot1_abs = 6.958186e-02, dot0_abs = 6.345721e-03, scale_magnitude = 3.790984e+00
+ Port 2, mode 1: kₙ = 6.016e+01-2.146e-14i m⁻¹
+ Level 0 (p = 2): 18128 unknowns
+ Level 0 (auxiliary) (p = 2): 4457 unknowns
+
+#PETSc Option Table entries:
+-eps_monitor # (source: code)
+#End of PETSc Option Table entries
+
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.551009e+00
+  1 (restart 0) KSP residual norm 3.467483e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.236e-12)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 3.350531e+01
+  1 (restart 0) KSP residual norm 5.551852e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.657e-13)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.904985e+01
+  1 (restart 0) KSP residual norm 6.906472e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.625e-13)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 3.499672e+01
+  1 (restart 0) KSP residual norm 1.678660e-11
+GMRES solver converged in 1 iteration (avg. reduction factor: 4.797e-13)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.668974e+01
+  1 (restart 0) KSP residual norm 3.644909e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.184e-13)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 2.694038e+01
+  1 (restart 0) KSP residual norm 1.005119e-11
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.731e-13)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.049049e+01
+  1 (restart 0) KSP residual norm 2.735869e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.608e-13)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.986575e+01
+  1 (restart 0) KSP residual norm 6.917039e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.482e-13)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.035295e+01
+  1 (restart 0) KSP residual norm 1.768340e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.708e-13)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.326141e+01
+  1 (restart 0) KSP residual norm 3.868716e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.917e-13)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.043907e+01
+  1 (restart 0) KSP residual norm 3.388227e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.246e-13)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 7.992602e+00
+  1 (restart 0) KSP residual norm 2.910608e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.642e-13)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 9.324185e+00
+  1 (restart 0) KSP residual norm 1.707838e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.832e-13)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.034424e+01
+  1 (restart 0) KSP residual norm 4.965908e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 4.801e-13)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 7.228976e+00
+  1 (restart 0) KSP residual norm 2.741377e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.792e-13)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 6.528641e+00
+  1 (restart 0) KSP residual norm 1.868044e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.861e-13)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 6.971202e+00
+  1 (restart 0) KSP residual norm 1.729089e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.480e-13)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 7.624877e+00
+  1 (restart 0) KSP residual norm 2.408635e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.159e-13)
+  1 EPS nconv=3 first unconverged value (error) -0.0101607+0.147315i (1.08191613e-02)
+
+ Linear eigensolve converged (3 eigenpairs) due to CONVERGED_TOL; iterations 1
+ Total number of linear systems solved: 18
+ Total number of linear solver iterations: 18
+ Found 3 converged eigenvalues (first = -8.235e-01+1.950e+01i)
+
+ Refining eigenvalues with Quasi-Newton solver
+Wave port normalization: dot1_abs = 3.537076e-02, dot0_abs = 2.263652e-03, scale_magnitude = 5.317137e+00
+Wave port normalization: dot1_abs = 7.162490e-02, dot0_abs = 6.532043e-03, scale_magnitude = 3.736526e+00
+Wave port normalization: dot1_abs = 6.673046e-02, dot0_abs = 4.270605e-03, scale_magnitude = 3.871132e+00
+Wave port normalization: dot1_abs = 8.500682e-02, dot0_abs = 7.752446e-03, scale_magnitude = 3.429834e+00
+Wave port normalization: dot1_abs = 9.046666e-02, dot0_abs = 5.789670e-03, scale_magnitude = 3.324725e+00
+Wave port normalization: dot1_abs = 9.832981e-02, dot0_abs = 8.967475e-03, scale_magnitude = 3.189021e+00
+Wave port normalization: dot1_abs = 3.537076e-02, dot0_abs = 2.263652e-03, scale_magnitude = 5.317137e+00
+Wave port normalization: dot1_abs = 7.162490e-02, dot0_abs = 6.532043e-03, scale_magnitude = 3.736526e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 8.798149e-01
+  1 (restart 0) KSP residual norm 4.849768e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 5.512e-12)
+0 NLEPS (nconv=0, restart=0) residual norm 5.704350e-02
+Wave port normalization: dot1_abs = 3.537077e-02, dot0_abs = 2.263653e-03, scale_magnitude = 5.317136e+00
+Wave port normalization: dot1_abs = 7.162491e-02, dot0_abs = 6.532043e-03, scale_magnitude = 3.736526e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 8.581075e-01
+  1 (restart 0) KSP residual norm 2.214692e-13
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.581e-13)
+Wave port normalization: dot1_abs = 3.917030e-02, dot0_abs = 2.506815e-03, scale_magnitude = 5.052677e+00
+Wave port normalization: dot1_abs = 7.290770e-02, dot0_abs = 6.649031e-03, scale_magnitude = 3.703508e+00
+1 NLEPS (nconv=0, restart=0) residual norm 6.095361e-02
+Wave port normalization: dot1_abs = 3.917031e-02, dot0_abs = 2.506815e-03, scale_magnitude = 5.052676e+00
+Wave port normalization: dot1_abs = 7.290770e-02, dot0_abs = 6.649031e-03, scale_magnitude = 3.703508e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 2.797589e-01
+  1 (restart 0) KSP residual norm 1.247121e-13
+GMRES solver converged in 1 iteration (avg. reduction factor: 4.458e-13)
+Wave port normalization: dot1_abs = 5.016617e-02, dot0_abs = 3.210526e-03, scale_magnitude = 4.464723e+00
+Wave port normalization: dot1_abs = 7.719194e-02, dot0_abs = 7.039745e-03, scale_magnitude = 3.599267e+00
+2 NLEPS (nconv=0, restart=0) residual norm 2.857851e-02
+Wave port normalization: dot1_abs = 5.016618e-02, dot0_abs = 3.210527e-03, scale_magnitude = 4.464723e+00
+Wave port normalization: dot1_abs = 7.719194e-02, dot0_abs = 7.039745e-03, scale_magnitude = 3.599267e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 4.039224e-01
+  1 (restart 0) KSP residual norm 1.071556e-13
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.653e-13)
+Wave port normalization: dot1_abs = 4.728874e-02, dot0_abs = 3.026377e-03, scale_magnitude = 4.598552e+00
+Wave port normalization: dot1_abs = 7.599358e-02, dot0_abs = 6.930457e-03, scale_magnitude = 3.627534e+00
+3 NLEPS (nconv=0, restart=0) residual norm 1.711306e-02
+Wave port normalization: dot1_abs = 4.728875e-02, dot0_abs = 3.026378e-03, scale_magnitude = 4.598552e+00
+Wave port normalization: dot1_abs = 7.599359e-02, dot0_abs = 6.930457e-03, scale_magnitude = 3.627534e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 6.541334e-02
+  1 (restart 0) KSP residual norm 1.975489e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.020e-13)
+Wave port normalization: dot1_abs = 4.440021e-02, dot0_abs = 2.841517e-03, scale_magnitude = 4.745779e+00
+Wave port normalization: dot1_abs = 7.484416e-02, dot0_abs = 6.825632e-03, scale_magnitude = 3.655283e+00
+4 NLEPS (nconv=0, restart=0) residual norm 8.267865e-03
+Wave port normalization: dot1_abs = 4.440022e-02, dot0_abs = 2.841518e-03, scale_magnitude = 4.745778e+00
+Wave port normalization: dot1_abs = 7.484416e-02, dot0_abs = 6.825632e-03, scale_magnitude = 3.655283e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 9.871166e-02
+  1 (restart 0) KSP residual norm 2.905030e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.943e-13)
+Wave port normalization: dot1_abs = 4.529582e-02, dot0_abs = 2.898835e-03, scale_magnitude = 4.698626e+00
+Wave port normalization: dot1_abs = 7.519466e-02, dot0_abs = 6.857597e-03, scale_magnitude = 3.646754e+00
+5 NLEPS (nconv=0, restart=0) residual norm 5.071967e-03
+Wave port normalization: dot1_abs = 4.529583e-02, dot0_abs = 2.898835e-03, scale_magnitude = 4.698626e+00
+Wave port normalization: dot1_abs = 7.519466e-02, dot0_abs = 6.857597e-03, scale_magnitude = 3.646754e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.549499e-02
+  1 (restart 0) KSP residual norm 1.180156e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 7.616e-13)
+Wave port normalization: dot1_abs = 4.610522e-02, dot0_abs = 2.950634e-03, scale_magnitude = 4.657201e+00
+Wave port normalization: dot1_abs = 7.551599e-02, dot0_abs = 6.886902e-03, scale_magnitude = 3.638987e+00
+6 NLEPS (nconv=0, restart=0) residual norm 3.227768e-03
+Wave port normalization: dot1_abs = 4.610523e-02, dot0_abs = 2.950635e-03, scale_magnitude = 4.657200e+00
+Wave port normalization: dot1_abs = 7.551600e-02, dot0_abs = 6.886903e-03, scale_magnitude = 3.638987e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 3.664629e-02
+  1 (restart 0) KSP residual norm 8.259209e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.254e-13)
+Wave port normalization: dot1_abs = 4.585440e-02, dot0_abs = 2.934582e-03, scale_magnitude = 4.669921e+00
+Wave port normalization: dot1_abs = 7.541596e-02, dot0_abs = 6.877779e-03, scale_magnitude = 3.641400e+00
+7 NLEPS (nconv=0, restart=0) residual norm 1.822191e-03
+Wave port normalization: dot1_abs = 4.585441e-02, dot0_abs = 2.934583e-03, scale_magnitude = 4.669920e+00
+Wave port normalization: dot1_abs = 7.541596e-02, dot0_abs = 6.877779e-03, scale_magnitude = 3.641400e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.044696e-02
+  1 (restart 0) KSP residual norm 4.427441e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 4.238e-13)
+Wave port normalization: dot1_abs = 4.554081e-02, dot0_abs = 2.914514e-03, scale_magnitude = 4.685971e+00
+Wave port normalization: dot1_abs = 7.529146e-02, dot0_abs = 6.866426e-03, scale_magnitude = 3.644409e+00
+8 NLEPS (nconv=0, restart=0) residual norm 1.202510e-03
+Wave port normalization: dot1_abs = 4.554082e-02, dot0_abs = 2.914514e-03, scale_magnitude = 4.685971e+00
+Wave port normalization: dot1_abs = 7.529147e-02, dot0_abs = 6.866426e-03, scale_magnitude = 3.644409e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.142670e-02
+  1 (restart 0) KSP residual norm 2.706225e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.368e-13)
+Wave port normalization: dot1_abs = 4.555000e-02, dot0_abs = 2.915101e-03, scale_magnitude = 4.685499e+00
+Wave port normalization: dot1_abs = 7.529510e-02, dot0_abs = 6.866757e-03, scale_magnitude = 3.644321e+00
+9 NLEPS (nconv=0, restart=0) residual norm 7.299573e-04
+Wave port normalization: dot1_abs = 4.555001e-02, dot0_abs = 2.915102e-03, scale_magnitude = 4.685498e+00
+Wave port normalization: dot1_abs = 7.529510e-02, dot0_abs = 6.866757e-03, scale_magnitude = 3.644321e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 7.259835e-03
+  1 (restart 0) KSP residual norm 2.605613e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.589e-13)
+Wave port normalization: dot1_abs = 4.566945e-02, dot0_abs = 2.922746e-03, scale_magnitude = 4.679367e+00
+Wave port normalization: dot1_abs = 7.534245e-02, dot0_abs = 6.871076e-03, scale_magnitude = 3.643176e+00
+10 NLEPS (nconv=0, restart=0) residual norm 4.672652e-04
+Wave port normalization: dot1_abs = 4.566946e-02, dot0_abs = 2.922747e-03, scale_magnitude = 4.679366e+00
+Wave port normalization: dot1_abs = 7.534246e-02, dot0_abs = 6.871076e-03, scale_magnitude = 3.643176e+00
+Wave port normalization: dot1_abs = 4.570237e-02, dot0_abs = 2.924853e-03, scale_magnitude = 4.677681e+00
+Wave port normalization: dot1_abs = 7.535552e-02, dot0_abs = 6.872267e-03, scale_magnitude = 3.642860e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 3.574505e+01
+  1 (restart 0) KSP residual norm 4.271945e-11
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.195e-12)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 4.203585e-01
+  1 (restart 0) KSP residual norm 8.522732e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.027e-13)
+11 NLEPS (nconv=0, restart=0) residual norm 4.207785e-04
+Wave port normalization: dot1_abs = 4.570238e-02, dot0_abs = 2.924854e-03, scale_magnitude = 4.677681e+00
+Wave port normalization: dot1_abs = 7.535553e-02, dot0_abs = 6.872268e-03, scale_magnitude = 3.642860e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 8.123011e-01
+  1 (restart 0) KSP residual norm 7.653302e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 9.422e-14)
+Wave port normalization: dot1_abs = 4.567422e-02, dot0_abs = 2.923051e-03, scale_magnitude = 4.679123e+00
+Wave port normalization: dot1_abs = 7.534434e-02, dot0_abs = 6.871248e-03, scale_magnitude = 3.643130e+00
+12 NLEPS (nconv=0, restart=0) residual norm 2.528697e-04
+Wave port normalization: dot1_abs = 4.567423e-02, dot0_abs = 2.923052e-03, scale_magnitude = 4.679122e+00
+Wave port normalization: dot1_abs = 7.534435e-02, dot0_abs = 6.871248e-03, scale_magnitude = 3.643130e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 8.226030e-02
+  1 (restart 0) KSP residual norm 2.398207e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.915e-13)
+Wave port normalization: dot1_abs = 4.564183e-02, dot0_abs = 2.920978e-03, scale_magnitude = 4.680783e+00
+Wave port normalization: dot1_abs = 7.533150e-02, dot0_abs = 6.870076e-03, scale_magnitude = 3.643441e+00
+13 NLEPS (nconv=0, restart=0) residual norm 1.941087e-04
+Wave port normalization: dot1_abs = 4.564184e-02, dot0_abs = 2.920979e-03, scale_magnitude = 4.680782e+00
+Wave port normalization: dot1_abs = 7.533150e-02, dot0_abs = 6.870077e-03, scale_magnitude = 3.643441e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 3.329954e-01
+  1 (restart 0) KSP residual norm 4.585225e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.377e-13)
+Wave port normalization: dot1_abs = 4.565152e-02, dot0_abs = 2.921599e-03, scale_magnitude = 4.680286e+00
+Wave port normalization: dot1_abs = 7.533534e-02, dot0_abs = 6.870427e-03, scale_magnitude = 3.643348e+00
+14 NLEPS (nconv=0, restart=0) residual norm 7.324750e-05
+Wave port normalization: dot1_abs = 4.565153e-02, dot0_abs = 2.921599e-03, scale_magnitude = 4.680285e+00
+Wave port normalization: dot1_abs = 7.533534e-02, dot0_abs = 6.870427e-03, scale_magnitude = 3.643348e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.203381e-01
+  1 (restart 0) KSP residual norm 1.444974e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.201e-13)
+Wave port normalization: dot1_abs = 4.566280e-02, dot0_abs = 2.922320e-03, scale_magnitude = 4.679708e+00
+Wave port normalization: dot1_abs = 7.533981e-02, dot0_abs = 6.870835e-03, scale_magnitude = 3.643240e+00
+15 NLEPS (nconv=0, restart=0) residual norm 7.010928e-05
+Wave port normalization: dot1_abs = 4.566281e-02, dot0_abs = 2.922321e-03, scale_magnitude = 4.679707e+00
+Wave port normalization: dot1_abs = 7.533982e-02, dot0_abs = 6.870835e-03, scale_magnitude = 3.643239e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 9.258321e-02
+  1 (restart 0) KSP residual norm 1.393312e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.505e-13)
+Wave port normalization: dot1_abs = 4.566087e-02, dot0_abs = 2.922197e-03, scale_magnitude = 4.679807e+00
+Wave port normalization: dot1_abs = 7.533905e-02, dot0_abs = 6.870765e-03, scale_magnitude = 3.643258e+00
+16 NLEPS (nconv=0, restart=0) residual norm 3.218374e-05
+Wave port normalization: dot1_abs = 4.566088e-02, dot0_abs = 2.922198e-03, scale_magnitude = 4.679806e+00
+Wave port normalization: dot1_abs = 7.533905e-02, dot0_abs = 6.870766e-03, scale_magnitude = 3.643258e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 6.747394e-02
+  1 (restart 0) KSP residual norm 1.446477e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.144e-13)
+Wave port normalization: dot1_abs = 4.565523e-02, dot0_abs = 2.921836e-03, scale_magnitude = 4.680096e+00
+Wave port normalization: dot1_abs = 7.533681e-02, dot0_abs = 6.870561e-03, scale_magnitude = 3.643312e+00
+17 NLEPS (nconv=0, restart=0) residual norm 2.591961e-05
+Wave port normalization: dot1_abs = 4.565524e-02, dot0_abs = 2.921836e-03, scale_magnitude = 4.680095e+00
+Wave port normalization: dot1_abs = 7.533681e-02, dot0_abs = 6.870561e-03, scale_magnitude = 3.643312e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.678118e-02
+  1 (restart 0) KSP residual norm 3.008763e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.793e-13)
+Wave port normalization: dot1_abs = 4.565443e-02, dot0_abs = 2.921785e-03, scale_magnitude = 4.680137e+00
+Wave port normalization: dot1_abs = 7.533649e-02, dot0_abs = 6.870532e-03, scale_magnitude = 3.643320e+00
+18 NLEPS (nconv=0, restart=0) residual norm 1.457565e-05
+Wave port normalization: dot1_abs = 4.565444e-02, dot0_abs = 2.921785e-03, scale_magnitude = 4.680136e+00
+Wave port normalization: dot1_abs = 7.533650e-02, dot0_abs = 6.870532e-03, scale_magnitude = 3.643320e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 3.067590e-02
+  1 (restart 0) KSP residual norm 4.339997e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.415e-13)
+Wave port normalization: dot1_abs = 4.565625e-02, dot0_abs = 2.921901e-03, scale_magnitude = 4.680043e+00
+Wave port normalization: dot1_abs = 7.533722e-02, dot0_abs = 6.870598e-03, scale_magnitude = 3.643302e+00
+19 NLEPS (nconv=0, restart=0) residual norm 8.139151e-06
+Wave port normalization: dot1_abs = 4.565626e-02, dot0_abs = 2.921902e-03, scale_magnitude = 4.680043e+00
+Wave port normalization: dot1_abs = 7.533722e-02, dot0_abs = 6.870598e-03, scale_magnitude = 3.643302e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 4.042612e-03
+  1 (restart 0) KSP residual norm 3.471075e-16
+GMRES solver converged in 1 iteration (avg. reduction factor: 8.586e-14)
+Wave port normalization: dot1_abs = 4.565705e-02, dot0_abs = 2.921952e-03, scale_magnitude = 4.680003e+00
+Wave port normalization: dot1_abs = 7.533753e-02, dot0_abs = 6.870627e-03, scale_magnitude = 3.643295e+00
+20 NLEPS (nconv=0, restart=0) residual norm 6.495145e-06
+Wave port normalization: dot1_abs = 4.565706e-02, dot0_abs = 2.921953e-03, scale_magnitude = 4.680002e+00
+Wave port normalization: dot1_abs = 7.533754e-02, dot0_abs = 6.870627e-03, scale_magnitude = 3.643295e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.110167e-02
+  1 (restart 0) KSP residual norm 2.321121e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.091e-13)
+Wave port normalization: dot1_abs = 4.565655e-02, dot0_abs = 2.921921e-03, scale_magnitude = 4.680028e+00
+Wave port normalization: dot1_abs = 7.533734e-02, dot0_abs = 6.870609e-03, scale_magnitude = 3.643299e+00
+21 NLEPS (nconv=0, restart=0) residual norm 2.671688e-06
+Wave port normalization: dot1_abs = 4.565656e-02, dot0_abs = 2.921921e-03, scale_magnitude = 4.680027e+00
+Wave port normalization: dot1_abs = 7.533734e-02, dot0_abs = 6.870609e-03, scale_magnitude = 3.643299e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 4.088572e-03
+  1 (restart 0) KSP residual norm 6.749580e-16
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.651e-13)
+Wave port normalization: dot1_abs = 4.565611e-02, dot0_abs = 2.921892e-03, scale_magnitude = 4.680051e+00
+Wave port normalization: dot1_abs = 7.533716e-02, dot0_abs = 6.870593e-03, scale_magnitude = 3.643304e+00
+22 NLEPS (nconv=0, restart=0) residual norm 2.583714e-06
+Wave port normalization: dot1_abs = 4.565611e-02, dot0_abs = 2.921892e-03, scale_magnitude = 4.680050e+00
+Wave port normalization: dot1_abs = 7.533716e-02, dot0_abs = 6.870593e-03, scale_magnitude = 3.643304e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 3.229143e-03
+  1 (restart 0) KSP residual norm 5.590567e-16
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.731e-13)
+Wave port normalization: dot1_abs = 4.565617e-02, dot0_abs = 2.921896e-03, scale_magnitude = 4.680047e+00
+Wave port normalization: dot1_abs = 7.533719e-02, dot0_abs = 6.870595e-03, scale_magnitude = 3.643303e+00
+23 NLEPS (nconv=0, restart=0) residual norm 1.093721e-06
+Wave port normalization: dot1_abs = 4.565618e-02, dot0_abs = 2.921897e-03, scale_magnitude = 4.680047e+00
+Wave port normalization: dot1_abs = 7.533719e-02, dot0_abs = 6.870596e-03, scale_magnitude = 3.643303e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 2.410546e-03
+  1 (restart 0) KSP residual norm 3.980775e-16
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.651e-13)
+Wave port normalization: dot1_abs = 4.565636e-02, dot0_abs = 2.921908e-03, scale_magnitude = 4.680038e+00
+Wave port normalization: dot1_abs = 7.533726e-02, dot0_abs = 6.870602e-03, scale_magnitude = 3.643301e+00
+24 NLEPS (nconv=0, restart=0) residual norm 9.092826e-07
+Eigenvalue 0, Quasi-Newton converged in 24 iterations (-7.352e-01+1.977e+01i).
+Wave port normalization: dot1_abs = 6.673046e-02, dot0_abs = 4.270605e-03, scale_magnitude = 3.871132e+00
+Wave port normalization: dot1_abs = 8.500682e-02, dot0_abs = 7.752446e-03, scale_magnitude = 3.429834e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.007659e+00
+  1 (restart 0) KSP residual norm 9.157508e-13
+GMRES solver converged in 1 iteration (avg. reduction factor: 9.088e-13)
+0 NLEPS (nconv=1, restart=0) residual norm 4.333250e-01
+Wave port normalization: dot1_abs = 6.673047e-02, dot0_abs = 4.270605e-03, scale_magnitude = 3.871131e+00
+Wave port normalization: dot1_abs = 8.500682e-02, dot0_abs = 7.752446e-03, scale_magnitude = 3.429834e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 4.899168e+00
+  1 (restart 0) KSP residual norm 7.369998e-13
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.504e-13)
+Wave port normalization: dot1_abs = 5.972439e-02, dot0_abs = 3.822232e-03, scale_magnitude = 4.091892e+00
+Wave port normalization: dot1_abs = 8.152417e-02, dot0_abs = 7.434835e-03, scale_magnitude = 3.502328e+00
+1 NLEPS (nconv=1, restart=0) residual norm 5.312514e-01
+Wave port normalization: dot1_abs = 5.972440e-02, dot0_abs = 3.822232e-03, scale_magnitude = 4.091892e+00
+Wave port normalization: dot1_abs = 8.152417e-02, dot0_abs = 7.434835e-03, scale_magnitude = 3.502328e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 3.231938e+00
+  1 (restart 0) KSP residual norm 4.971548e-13
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.538e-13)
+Wave port normalization: dot1_abs = 2.916349e-02, dot0_abs = 1.866400e-03, scale_magnitude = 5.855719e+00
+Wave port normalization: dot1_abs = 6.977030e-02, dot0_abs = 6.362907e-03, scale_magnitude = 3.785861e+00
+2 NLEPS (nconv=1, restart=0) residual norm 2.120827e-01
+Wave port normalization: dot1_abs = 2.916351e-02, dot0_abs = 1.866401e-03, scale_magnitude = 5.855718e+00
+Wave port normalization: dot1_abs = 6.977030e-02, dot0_abs = 6.362907e-03, scale_magnitude = 3.785861e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.227668e+00
+  1 (restart 0) KSP residual norm 2.467868e-13
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.010e-13)
+Wave port normalization: dot1_abs = 5.986774e-02, dot0_abs = 3.831406e-03, scale_magnitude = 4.086990e+00
+Wave port normalization: dot1_abs = 8.159297e-02, dot0_abs = 7.441110e-03, scale_magnitude = 3.500851e+00
+3 NLEPS (nconv=1, restart=0) residual norm 2.880733e-01
+Wave port normalization: dot1_abs = 5.986775e-02, dot0_abs = 3.831406e-03, scale_magnitude = 4.086990e+00
+Wave port normalization: dot1_abs = 8.159297e-02, dot0_abs = 7.441110e-03, scale_magnitude = 3.500851e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.132140e+00
+  1 (restart 0) KSP residual norm 2.191399e-13
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.936e-13)
+Wave port normalization: dot1_abs = 6.715180e-02, dot0_abs = 4.297569e-03, scale_magnitude = 3.858968e+00
+Wave port normalization: dot1_abs = 8.522374e-02, dot0_abs = 7.772229e-03, scale_magnitude = 3.425466e+00
+4 NLEPS (nconv=1, restart=0) residual norm 1.153086e-01
+Wave port normalization: dot1_abs = 6.715180e-02, dot0_abs = 4.297570e-03, scale_magnitude = 3.858968e+00
+Wave port normalization: dot1_abs = 8.522375e-02, dot0_abs = 7.772229e-03, scale_magnitude = 3.425466e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.066880e+00
+  1 (restart 0) KSP residual norm 2.604088e-13
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.441e-13)
+Wave port normalization: dot1_abs = 7.985128e-02, dot0_abs = 5.110309e-03, scale_magnitude = 3.538825e+00
+Wave port normalization: dot1_abs = 9.211509e-02, dot0_abs = 8.400705e-03, scale_magnitude = 3.294842e+00
+5 NLEPS (nconv=1, restart=0) residual norm 9.289572e-02
+Wave port normalization: dot1_abs = 7.985129e-02, dot0_abs = 5.110309e-03, scale_magnitude = 3.538825e+00
+Wave port normalization: dot1_abs = 9.211509e-02, dot0_abs = 8.400705e-03, scale_magnitude = 3.294842e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 4.492214e-01
+  1 (restart 0) KSP residual norm 8.890796e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.979e-13)
+Wave port normalization: dot1_abs = 7.637257e-02, dot0_abs = 4.887679e-03, scale_magnitude = 3.618523e+00
+Wave port normalization: dot1_abs = 9.016333e-02, dot0_abs = 8.222709e-03, scale_magnitude = 3.330313e+00
+6 NLEPS (nconv=1, restart=0) residual norm 9.761814e-02
+Wave port normalization: dot1_abs = 7.637257e-02, dot0_abs = 4.887679e-03, scale_magnitude = 3.618523e+00
+Wave port normalization: dot1_abs = 9.016333e-02, dot0_abs = 8.222709e-03, scale_magnitude = 3.330313e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 6.420030e-01
+  1 (restart 0) KSP residual norm 1.532177e-13
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.387e-13)
+Wave port normalization: dot1_abs = 7.988811e-02, dot0_abs = 5.112666e-03, scale_magnitude = 3.538009e+00
+Wave port normalization: dot1_abs = 9.213599e-02, dot0_abs = 8.402611e-03, scale_magnitude = 3.294468e+00
+7 NLEPS (nconv=1, restart=0) residual norm 5.218489e-02
+Wave port normalization: dot1_abs = 7.988812e-02, dot0_abs = 5.112667e-03, scale_magnitude = 3.538009e+00
+Wave port normalization: dot1_abs = 9.213599e-02, dot0_abs = 8.402612e-03, scale_magnitude = 3.294468e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 2.306809e-01
+  1 (restart 0) KSP residual norm 3.547583e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.538e-13)
+Wave port normalization: dot1_abs = 7.516637e-02, dot0_abs = 4.810485e-03, scale_magnitude = 3.647440e+00
+Wave port normalization: dot1_abs = 8.949731e-02, dot0_abs = 8.161969e-03, scale_magnitude = 3.342682e+00
+8 NLEPS (nconv=1, restart=0) residual norm 3.819150e-02
+Wave port normalization: dot1_abs = 7.516638e-02, dot0_abs = 4.810485e-03, scale_magnitude = 3.647440e+00
+Wave port normalization: dot1_abs = 8.949732e-02, dot0_abs = 8.161970e-03, scale_magnitude = 3.342681e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.339469e-01
+  1 (restart 0) KSP residual norm 3.023190e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.257e-13)
+Wave port normalization: dot1_abs = 7.719473e-02, dot0_abs = 4.940295e-03, scale_magnitude = 3.599202e+00
+Wave port normalization: dot1_abs = 9.062051e-02, dot0_abs = 8.264403e-03, scale_magnitude = 3.321901e+00
+9 NLEPS (nconv=1, restart=0) residual norm 1.521660e-02
+Wave port normalization: dot1_abs = 7.719473e-02, dot0_abs = 4.940296e-03, scale_magnitude = 3.599202e+00
+Wave port normalization: dot1_abs = 9.062052e-02, dot0_abs = 8.264403e-03, scale_magnitude = 3.321901e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.306487e-01
+  1 (restart 0) KSP residual norm 1.636398e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.253e-13)
+Wave port normalization: dot1_abs = 7.868511e-02, dot0_abs = 5.035677e-03, scale_magnitude = 3.564952e+00
+Wave port normalization: dot1_abs = 9.145579e-02, dot0_abs = 8.340578e-03, scale_magnitude = 3.306697e+00
+10 NLEPS (nconv=1, restart=0) residual norm 1.714906e-02
+Wave port normalization: dot1_abs = 7.868511e-02, dot0_abs = 5.035677e-03, scale_magnitude = 3.564952e+00
+Wave port normalization: dot1_abs = 9.145579e-02, dot0_abs = 8.340578e-03, scale_magnitude = 3.306697e+00
+Wave port normalization: dot1_abs = 7.822953e-02, dot0_abs = 5.006520e-03, scale_magnitude = 3.575318e+00
+Wave port normalization: dot1_abs = 9.119958e-02, dot0_abs = 8.317213e-03, scale_magnitude = 3.311339e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 6.138212e+00
+  1 (restart 0) KSP residual norm 4.170307e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 6.794e-13)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 3.966568e-01
+  1 (restart 0) KSP residual norm 6.786372e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.711e-13)
+11 NLEPS (nconv=1, restart=0) residual norm 1.233521e-02
+Wave port normalization: dot1_abs = 7.822953e-02, dot0_abs = 5.006521e-03, scale_magnitude = 3.575318e+00
+Wave port normalization: dot1_abs = 9.119958e-02, dot0_abs = 8.317213e-03, scale_magnitude = 3.311338e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 9.204015e-01
+  1 (restart 0) KSP residual norm 1.286990e-13
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.398e-13)
+Wave port normalization: dot1_abs = 7.774012e-02, dot0_abs = 4.975199e-03, scale_magnitude = 3.586554e+00
+Wave port normalization: dot1_abs = 9.092521e-02, dot0_abs = 8.292191e-03, scale_magnitude = 3.316331e+00
+12 NLEPS (nconv=1, restart=0) residual norm 8.993866e-03
+Wave port normalization: dot1_abs = 7.774013e-02, dot0_abs = 4.975200e-03, scale_magnitude = 3.586554e+00
+Wave port normalization: dot1_abs = 9.092521e-02, dot0_abs = 8.292191e-03, scale_magnitude = 3.316331e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 5.427266e-02
+  1 (restart 0) KSP residual norm 7.530808e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.388e-13)
+Wave port normalization: dot1_abs = 7.777357e-02, dot0_abs = 4.977340e-03, scale_magnitude = 3.585783e+00
+Wave port normalization: dot1_abs = 9.094393e-02, dot0_abs = 8.293898e-03, scale_magnitude = 3.315989e+00
+13 NLEPS (nconv=1, restart=0) residual norm 5.909825e-03
+Wave port normalization: dot1_abs = 7.777357e-02, dot0_abs = 4.977340e-03, scale_magnitude = 3.585783e+00
+Wave port normalization: dot1_abs = 9.094394e-02, dot0_abs = 8.293898e-03, scale_magnitude = 3.315989e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 4.123287e-01
+  1 (restart 0) KSP residual norm 6.933927e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.682e-13)
+Wave port normalization: dot1_abs = 7.796889e-02, dot0_abs = 4.989840e-03, scale_magnitude = 3.581289e+00
+Wave port normalization: dot1_abs = 9.105335e-02, dot0_abs = 8.303877e-03, scale_magnitude = 3.313996e+00
+14 NLEPS (nconv=1, restart=0) residual norm 2.453921e-03
+Wave port normalization: dot1_abs = 7.796889e-02, dot0_abs = 4.989840e-03, scale_magnitude = 3.581289e+00
+Wave port normalization: dot1_abs = 9.105335e-02, dot0_abs = 8.303877e-03, scale_magnitude = 3.313996e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.577684e-01
+  1 (restart 0) KSP residual norm 2.044896e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.296e-13)
+Wave port normalization: dot1_abs = 7.804111e-02, dot0_abs = 4.994462e-03, scale_magnitude = 3.579631e+00
+Wave port normalization: dot1_abs = 9.109384e-02, dot0_abs = 8.307569e-03, scale_magnitude = 3.313260e+00
+15 NLEPS (nconv=1, restart=0) residual norm 1.909487e-03
+Wave port normalization: dot1_abs = 7.804111e-02, dot0_abs = 4.994462e-03, scale_magnitude = 3.579631e+00
+Wave port normalization: dot1_abs = 9.109384e-02, dot0_abs = 8.307570e-03, scale_magnitude = 3.313260e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 8.593907e-02
+  1 (restart 0) KSP residual norm 1.962515e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.284e-13)
+Wave port normalization: dot1_abs = 7.797465e-02, dot0_abs = 4.990209e-03, scale_magnitude = 3.581156e+00
+Wave port normalization: dot1_abs = 9.105658e-02, dot0_abs = 8.304171e-03, scale_magnitude = 3.313938e+00
+16 NLEPS (nconv=1, restart=0) residual norm 9.018698e-04
+Wave port normalization: dot1_abs = 7.797466e-02, dot0_abs = 4.990209e-03, scale_magnitude = 3.581156e+00
+Wave port normalization: dot1_abs = 9.105658e-02, dot0_abs = 8.304172e-03, scale_magnitude = 3.313938e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 7.979927e-02
+  1 (restart 0) KSP residual norm 1.102567e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.382e-13)
+Wave port normalization: dot1_abs = 7.791141e-02, dot0_abs = 4.986161e-03, scale_magnitude = 3.582610e+00
+Wave port normalization: dot1_abs = 9.102113e-02, dot0_abs = 8.300939e-03, scale_magnitude = 3.314583e+00
+17 NLEPS (nconv=1, restart=0) residual norm 6.379010e-04
+Wave port normalization: dot1_abs = 7.791141e-02, dot0_abs = 4.986162e-03, scale_magnitude = 3.582609e+00
+Wave port normalization: dot1_abs = 9.102114e-02, dot0_abs = 8.300939e-03, scale_magnitude = 3.314583e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 8.521104e-03
+  1 (restart 0) KSP residual norm 2.343385e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 2.750e-13)
+Wave port normalization: dot1_abs = 7.791146e-02, dot0_abs = 4.986165e-03, scale_magnitude = 3.582608e+00
+Wave port normalization: dot1_abs = 9.102117e-02, dot0_abs = 8.300942e-03, scale_magnitude = 3.314582e+00
+18 NLEPS (nconv=1, restart=0) residual norm 4.023618e-04
+Wave port normalization: dot1_abs = 7.791147e-02, dot0_abs = 4.986165e-03, scale_magnitude = 3.582608e+00
+Wave port normalization: dot1_abs = 9.102117e-02, dot0_abs = 8.300942e-03, scale_magnitude = 3.314582e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 2.968890e-02
+  1 (restart 0) KSP residual norm 9.557788e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.219e-13)
+Wave port normalization: dot1_abs = 7.793389e-02, dot0_abs = 4.987600e-03, scale_magnitude = 3.582093e+00
+Wave port normalization: dot1_abs = 9.103373e-02, dot0_abs = 8.302087e-03, scale_magnitude = 3.314354e+00
+19 NLEPS (nconv=1, restart=0) residual norm 1.790895e-04
+Wave port normalization: dot1_abs = 7.793389e-02, dot0_abs = 4.987600e-03, scale_magnitude = 3.582093e+00
+Wave port normalization: dot1_abs = 9.103373e-02, dot0_abs = 8.302088e-03, scale_magnitude = 3.314353e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 9.588211e-03
+  1 (restart 0) KSP residual norm 1.327119e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.384e-13)
+Wave port normalization: dot1_abs = 7.794055e-02, dot0_abs = 4.988026e-03, scale_magnitude = 3.581940e+00
+Wave port normalization: dot1_abs = 9.103746e-02, dot0_abs = 8.302428e-03, scale_magnitude = 3.314286e+00
+20 NLEPS (nconv=1, restart=0) residual norm 1.533640e-04
+Wave port normalization: dot1_abs = 7.794055e-02, dot0_abs = 4.988026e-03, scale_magnitude = 3.581940e+00
+Wave port normalization: dot1_abs = 9.103747e-02, dot0_abs = 8.302428e-03, scale_magnitude = 3.314286e+00
+Wave port normalization: dot1_abs = 7.793490e-02, dot0_abs = 4.987665e-03, scale_magnitude = 3.582069e+00
+Wave port normalization: dot1_abs = 9.103430e-02, dot0_abs = 8.302139e-03, scale_magnitude = 3.314343e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 5.148901e+02
+  1 (restart 0) KSP residual norm 4.363928e-11
+GMRES solver converged in 1 iteration (avg. reduction factor: 8.475e-14)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 6.384170e-01
+  1 (restart 0) KSP residual norm 4.004188e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 6.272e-14)
+21 NLEPS (nconv=1, restart=0) residual norm 1.435453e-04
+Wave port normalization: dot1_abs = 7.793491e-02, dot0_abs = 4.987665e-03, scale_magnitude = 3.582069e+00
+Wave port normalization: dot1_abs = 9.103430e-02, dot0_abs = 8.302140e-03, scale_magnitude = 3.314343e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 9.041653e-01
+  1 (restart 0) KSP residual norm 4.085005e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 4.518e-14)
+Wave port normalization: dot1_abs = 7.792906e-02, dot0_abs = 4.987291e-03, scale_magnitude = 3.582204e+00
+Wave port normalization: dot1_abs = 9.103102e-02, dot0_abs = 8.301841e-03, scale_magnitude = 3.314403e+00
+22 NLEPS (nconv=1, restart=0) residual norm 1.103999e-04
+Wave port normalization: dot1_abs = 7.792906e-02, dot0_abs = 4.987291e-03, scale_magnitude = 3.582204e+00
+Wave port normalization: dot1_abs = 9.103103e-02, dot0_abs = 8.301841e-03, scale_magnitude = 3.314403e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 2.107757e-03
+  1 (restart 0) KSP residual norm 1.169829e-16
+GMRES solver converged in 1 iteration (avg. reduction factor: 5.550e-14)
+Wave port normalization: dot1_abs = 7.793050e-02, dot0_abs = 4.987383e-03, scale_magnitude = 3.582171e+00
+Wave port normalization: dot1_abs = 9.103183e-02, dot0_abs = 8.301914e-03, scale_magnitude = 3.314388e+00
+23 NLEPS (nconv=1, restart=0) residual norm 6.558057e-05
+Wave port normalization: dot1_abs = 7.793051e-02, dot0_abs = 4.987384e-03, scale_magnitude = 3.582170e+00
+Wave port normalization: dot1_abs = 9.103184e-02, dot0_abs = 8.301915e-03, scale_magnitude = 3.314388e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 4.120543e-01
+  1 (restart 0) KSP residual norm 4.990211e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.211e-13)
+Wave port normalization: dot1_abs = 7.793312e-02, dot0_abs = 4.987551e-03, scale_magnitude = 3.582110e+00
+Wave port normalization: dot1_abs = 9.103330e-02, dot0_abs = 8.302048e-03, scale_magnitude = 3.314361e+00
+24 NLEPS (nconv=1, restart=0) residual norm 2.790782e-05
+Wave port normalization: dot1_abs = 7.793312e-02, dot0_abs = 4.987551e-03, scale_magnitude = 3.582110e+00
+Wave port normalization: dot1_abs = 9.103330e-02, dot0_abs = 8.302049e-03, scale_magnitude = 3.314361e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.422153e-01
+  1 (restart 0) KSP residual norm 1.065591e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 7.493e-14)
+Wave port normalization: dot1_abs = 7.793377e-02, dot0_abs = 4.987592e-03, scale_magnitude = 3.582096e+00
+Wave port normalization: dot1_abs = 9.103366e-02, dot0_abs = 8.302081e-03, scale_magnitude = 3.314355e+00
+25 NLEPS (nconv=1, restart=0) residual norm 2.119114e-05
+Wave port normalization: dot1_abs = 7.793377e-02, dot0_abs = 4.987593e-03, scale_magnitude = 3.582095e+00
+Wave port normalization: dot1_abs = 9.103367e-02, dot0_abs = 8.302082e-03, scale_magnitude = 3.314355e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 8.415256e-02
+  1 (restart 0) KSP residual norm 4.889265e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 5.810e-14)
+Wave port normalization: dot1_abs = 7.793295e-02, dot0_abs = 4.987540e-03, scale_magnitude = 3.582114e+00
+Wave port normalization: dot1_abs = 9.103320e-02, dot0_abs = 8.302039e-03, scale_magnitude = 3.314363e+00
+26 NLEPS (nconv=1, restart=0) residual norm 9.672088e-06
+Wave port normalization: dot1_abs = 7.793295e-02, dot0_abs = 4.987540e-03, scale_magnitude = 3.582114e+00
+Wave port normalization: dot1_abs = 9.103321e-02, dot0_abs = 8.302040e-03, scale_magnitude = 3.314363e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 7.467680e-02
+  1 (restart 0) KSP residual norm 5.004967e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 6.702e-14)
+Wave port normalization: dot1_abs = 7.793230e-02, dot0_abs = 4.987498e-03, scale_magnitude = 3.582129e+00
+Wave port normalization: dot1_abs = 9.103284e-02, dot0_abs = 8.302006e-03, scale_magnitude = 3.314370e+00
+27 NLEPS (nconv=1, restart=0) residual norm 6.805489e-06
+Wave port normalization: dot1_abs = 7.793230e-02, dot0_abs = 4.987499e-03, scale_magnitude = 3.582129e+00
+Wave port normalization: dot1_abs = 9.103284e-02, dot0_abs = 8.302007e-03, scale_magnitude = 3.314370e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 7.332303e-03
+  1 (restart 0) KSP residual norm 5.113274e-16
+GMRES solver converged in 1 iteration (avg. reduction factor: 6.974e-14)
+Wave port normalization: dot1_abs = 7.793232e-02, dot0_abs = 4.987499e-03, scale_magnitude = 3.582129e+00
+Wave port normalization: dot1_abs = 9.103285e-02, dot0_abs = 8.302007e-03, scale_magnitude = 3.314370e+00
+28 NLEPS (nconv=1, restart=0) residual norm 4.272806e-06
+Wave port normalization: dot1_abs = 7.793232e-02, dot0_abs = 4.987500e-03, scale_magnitude = 3.582129e+00
+Wave port normalization: dot1_abs = 9.103285e-02, dot0_abs = 8.302007e-03, scale_magnitude = 3.314369e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 2.698485e-02
+  1 (restart 0) KSP residual norm 2.108337e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 7.813e-14)
+Wave port normalization: dot1_abs = 7.793255e-02, dot0_abs = 4.987514e-03, scale_magnitude = 3.582123e+00
+Wave port normalization: dot1_abs = 9.103298e-02, dot0_abs = 8.302019e-03, scale_magnitude = 3.314367e+00
+29 NLEPS (nconv=1, restart=0) residual norm 1.852308e-06
+Wave port normalization: dot1_abs = 7.793256e-02, dot0_abs = 4.987515e-03, scale_magnitude = 3.582123e+00
+Wave port normalization: dot1_abs = 9.103298e-02, dot0_abs = 8.302019e-03, scale_magnitude = 3.314367e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 9.071479e-03
+  1 (restart 0) KSP residual norm 6.755368e-16
+GMRES solver converged in 1 iteration (avg. reduction factor: 7.447e-14)
+Wave port normalization: dot1_abs = 7.793262e-02, dot0_abs = 4.987519e-03, scale_magnitude = 3.582122e+00
+Wave port normalization: dot1_abs = 9.103302e-02, dot0_abs = 8.302023e-03, scale_magnitude = 3.314366e+00
+30 NLEPS (nconv=1, restart=0) residual norm 1.573972e-06
+Wave port normalization: dot1_abs = 7.793262e-02, dot0_abs = 4.987519e-03, scale_magnitude = 3.582122e+00
+Wave port normalization: dot1_abs = 9.103302e-02, dot0_abs = 8.302023e-03, scale_magnitude = 3.314366e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 6.294127e-03
+  1 (restart 0) KSP residual norm 3.631925e-16
+GMRES solver converged in 1 iteration (avg. reduction factor: 5.770e-14)
+Wave port normalization: dot1_abs = 7.793256e-02, dot0_abs = 4.987515e-03, scale_magnitude = 3.582123e+00
+Wave port normalization: dot1_abs = 9.103299e-02, dot0_abs = 8.302020e-03, scale_magnitude = 3.314367e+00
+31 NLEPS (nconv=1, restart=0) residual norm 6.735411e-07
+Eigenvalue 1, Quasi-Newton converged in 31 iterations (-1.149e+00+2.121e+01i).
+Wave port normalization: dot1_abs = 9.046666e-02, dot0_abs = 5.789670e-03, scale_magnitude = 3.324725e+00
+Wave port normalization: dot1_abs = 9.832981e-02, dot0_abs = 8.967475e-03, scale_magnitude = 3.189021e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 8.818400e-01
+  1 (restart 0) KSP residual norm 2.670496e-13
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.028e-13)
+0 NLEPS (nconv=2, restart=0) residual norm 5.318918e-01
+Wave port normalization: dot1_abs = 9.046667e-02, dot0_abs = 5.789671e-03, scale_magnitude = 3.324725e+00
+Wave port normalization: dot1_abs = 9.832981e-02, dot0_abs = 8.967475e-03, scale_magnitude = 3.189021e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 2.490225e+01
+  1 (restart 0) KSP residual norm 1.254964e-12
+GMRES solver converged in 1 iteration (avg. reduction factor: 5.040e-14)
+Wave port normalization: dot1_abs = 1.572433e-01, dot0_abs = 1.006323e-02, scale_magnitude = 2.521819e+00
+Wave port normalization: dot1_abs = 1.431682e-01, dot0_abs = 1.305664e-02, scale_magnitude = 2.642876e+00
+1 NLEPS (nconv=2, restart=0) residual norm 2.994137e+00
+Wave port normalization: dot1_abs = 1.572433e-01, dot0_abs = 1.006323e-02, scale_magnitude = 2.521819e+00
+Wave port normalization: dot1_abs = 1.431682e-01, dot0_abs = 1.305664e-02, scale_magnitude = 2.642876e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.934468e+00
+  1 (restart 0) KSP residual norm 1.145615e-13
+GMRES solver converged in 1 iteration (avg. reduction factor: 5.922e-14)
+Wave port normalization: dot1_abs = 1.021591e-01, dot0_abs = 6.537963e-03, scale_magnitude = 3.128682e+00
+Wave port normalization: dot1_abs = 1.055611e-01, dot0_abs = 9.626957e-03, scale_magnitude = 3.077854e+00
+2 NLEPS (nconv=2, restart=0) residual norm 6.889862e-01
+Wave port normalization: dot1_abs = 1.021591e-01, dot0_abs = 6.537964e-03, scale_magnitude = 3.128682e+00
+Wave port normalization: dot1_abs = 1.055611e-01, dot0_abs = 9.626957e-03, scale_magnitude = 3.077854e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.177379e+00
+  1 (restart 0) KSP residual norm 7.525245e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 6.392e-14)
+Wave port normalization: dot1_abs = 3.654347e-02, dot0_abs = 2.338703e-03, scale_magnitude = 5.231125e+00
+Wave port normalization: dot1_abs = 7.200927e-02, dot0_abs = 6.567096e-03, scale_magnitude = 3.726540e+00
+3 NLEPS (nconv=2, restart=0) residual norm 2.210945e-01
+Wave port normalization: dot1_abs = 3.654349e-02, dot0_abs = 2.338704e-03, scale_magnitude = 5.231124e+00
+Wave port normalization: dot1_abs = 7.200927e-02, dot0_abs = 6.567096e-03, scale_magnitude = 3.726540e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 7.480012e-01
+  1 (restart 0) KSP residual norm 4.922531e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 6.581e-14)
+Wave port normalization: dot1_abs = 9.164316e-02, dot0_abs = 5.864964e-03, scale_magnitude = 3.303315e+00
+Wave port normalization: dot1_abs = 9.904043e-02, dot0_abs = 9.032282e-03, scale_magnitude = 3.177560e+00
+4 NLEPS (nconv=2, restart=0) residual norm 2.173693e-01
+Wave port normalization: dot1_abs = 9.164316e-02, dot0_abs = 5.864964e-03, scale_magnitude = 3.303315e+00
+Wave port normalization: dot1_abs = 9.904043e-02, dot0_abs = 9.032282e-03, scale_magnitude = 3.177560e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 8.985969e-01
+  1 (restart 0) KSP residual norm 7.255246e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 8.074e-14)
+Wave port normalization: dot1_abs = 8.326633e-02, dot0_abs = 5.328865e-03, scale_magnitude = 3.465495e+00
+Wave port normalization: dot1_abs = 9.407366e-02, dot0_abs = 8.579323e-03, scale_magnitude = 3.260363e+00
+5 NLEPS (nconv=2, restart=0) residual norm 7.224844e-02
+Wave port normalization: dot1_abs = 8.326634e-02, dot0_abs = 5.328865e-03, scale_magnitude = 3.465495e+00
+Wave port normalization: dot1_abs = 9.407366e-02, dot0_abs = 8.579323e-03, scale_magnitude = 3.260363e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.403297e-01
+  1 (restart 0) KSP residual norm 9.739805e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 6.941e-14)
+Wave port normalization: dot1_abs = 9.825647e-02, dot0_abs = 6.288201e-03, scale_magnitude = 3.190211e+00
+Wave port normalization: dot1_abs = 1.031074e-01, dot0_abs = 9.403180e-03, scale_magnitude = 3.114262e+00
+6 NLEPS (nconv=2, restart=0) residual norm 3.732965e-02
+Wave port normalization: dot1_abs = 9.825648e-02, dot0_abs = 6.288202e-03, scale_magnitude = 3.190211e+00
+Wave port normalization: dot1_abs = 1.031074e-01, dot0_abs = 9.403180e-03, scale_magnitude = 3.114262e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.978395e-01
+  1 (restart 0) KSP residual norm 1.769365e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 8.943e-14)
+Wave port normalization: dot1_abs = 1.009836e-01, dot0_abs = 6.462730e-03, scale_magnitude = 3.146840e+00
+Wave port normalization: dot1_abs = 1.048181e-01, dot0_abs = 9.559189e-03, scale_magnitude = 3.088744e+00
+7 NLEPS (nconv=2, restart=0) residual norm 2.061971e-02
+Wave port normalization: dot1_abs = 1.009836e-01, dot0_abs = 6.462730e-03, scale_magnitude = 3.146840e+00
+Wave port normalization: dot1_abs = 1.048181e-01, dot0_abs = 9.559189e-03, scale_magnitude = 3.088744e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.267398e-01
+  1 (restart 0) KSP residual norm 9.237744e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 7.289e-14)
+Wave port normalization: dot1_abs = 9.970577e-02, dot0_abs = 6.380953e-03, scale_magnitude = 3.166940e+00
+Wave port normalization: dot1_abs = 1.040142e-01, dot0_abs = 9.485878e-03, scale_magnitude = 3.100657e+00
+8 NLEPS (nconv=2, restart=0) residual norm 8.736100e-03
+Wave port normalization: dot1_abs = 9.970578e-02, dot0_abs = 6.380954e-03, scale_magnitude = 3.166940e+00
+Wave port normalization: dot1_abs = 1.040142e-01, dot0_abs = 9.485878e-03, scale_magnitude = 3.100657e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 4.290924e-02
+  1 (restart 0) KSP residual norm 2.916727e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 6.797e-14)
+Wave port normalization: dot1_abs = 9.956587e-02, dot0_abs = 6.372000e-03, scale_magnitude = 3.169164e+00
+Wave port normalization: dot1_abs = 1.039264e-01, dot0_abs = 9.477874e-03, scale_magnitude = 3.101966e+00
+9 NLEPS (nconv=2, restart=0) residual norm 7.492758e-03
+Wave port normalization: dot1_abs = 9.956587e-02, dot0_abs = 6.372000e-03, scale_magnitude = 3.169164e+00
+Wave port normalization: dot1_abs = 1.039264e-01, dot0_abs = 9.477874e-03, scale_magnitude = 3.101966e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 2.308392e-02
+  1 (restart 0) KSP residual norm 1.999883e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 8.664e-14)
+Wave port normalization: dot1_abs = 9.992191e-02, dot0_abs = 6.394786e-03, scale_magnitude = 3.163513e+00
+Wave port normalization: dot1_abs = 1.041499e-01, dot0_abs = 9.498252e-03, scale_magnitude = 3.098636e+00
+10 NLEPS (nconv=2, restart=0) residual norm 3.047025e-03
+Wave port normalization: dot1_abs = 9.992191e-02, dot0_abs = 6.394786e-03, scale_magnitude = 3.163513e+00
+Wave port normalization: dot1_abs = 1.041499e-01, dot0_abs = 9.498252e-03, scale_magnitude = 3.098636e+00
+Wave port normalization: dot1_abs = 1.002815e-01, dot0_abs = 6.417801e-03, scale_magnitude = 3.157836e+00
+Wave port normalization: dot1_abs = 1.043759e-01, dot0_abs = 9.518865e-03, scale_magnitude = 3.095280e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 5.621860e+00
+  1 (restart 0) KSP residual norm 9.096172e-13
+GMRES solver converged in 1 iteration (avg. reduction factor: 1.618e-13)
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 6.624173e-01
+  1 (restart 0) KSP residual norm 2.057575e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.106e-14)
+11 NLEPS (nconv=2, restart=0) residual norm 2.878876e-03
+Wave port normalization: dot1_abs = 1.002815e-01, dot0_abs = 6.417801e-03, scale_magnitude = 3.157836e+00
+Wave port normalization: dot1_abs = 1.043759e-01, dot0_abs = 9.518865e-03, scale_magnitude = 3.095280e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 5.966987e-01
+  1 (restart 0) KSP residual norm 2.436967e-14
+GMRES solver converged in 1 iteration (avg. reduction factor: 4.084e-14)
+Wave port normalization: dot1_abs = 1.004298e-01, dot0_abs = 6.427289e-03, scale_magnitude = 3.155504e+00
+Wave port normalization: dot1_abs = 1.044692e-01, dot0_abs = 9.527371e-03, scale_magnitude = 3.093898e+00
+12 NLEPS (nconv=2, restart=0) residual norm 2.431435e-03
+Wave port normalization: dot1_abs = 1.004298e-01, dot0_abs = 6.427289e-03, scale_magnitude = 3.155504e+00
+Wave port normalization: dot1_abs = 1.044692e-01, dot0_abs = 9.527372e-03, scale_magnitude = 3.093898e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 3.844066e-02
+  1 (restart 0) KSP residual norm 1.420835e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.696e-14)
+Wave port normalization: dot1_abs = 1.001287e-01, dot0_abs = 6.408019e-03, scale_magnitude = 3.160245e+00
+Wave port normalization: dot1_abs = 1.042798e-01, dot0_abs = 9.510100e-03, scale_magnitude = 3.096706e+00
+13 NLEPS (nconv=2, restart=0) residual norm 9.664405e-04
+Wave port normalization: dot1_abs = 1.001287e-01, dot0_abs = 6.408019e-03, scale_magnitude = 3.160245e+00
+Wave port normalization: dot1_abs = 1.042798e-01, dot0_abs = 9.510100e-03, scale_magnitude = 3.096706e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 2.086188e-01
+  1 (restart 0) KSP residual norm 8.173609e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.918e-14)
+Wave port normalization: dot1_abs = 1.000887e-01, dot0_abs = 6.405460e-03, scale_magnitude = 3.160876e+00
+Wave port normalization: dot1_abs = 1.042547e-01, dot0_abs = 9.507809e-03, scale_magnitude = 3.097079e+00
+14 NLEPS (nconv=2, restart=0) residual norm 6.790875e-04
+Wave port normalization: dot1_abs = 1.000887e-01, dot0_abs = 6.405460e-03, scale_magnitude = 3.160876e+00
+Wave port normalization: dot1_abs = 1.042547e-01, dot0_abs = 9.507809e-03, scale_magnitude = 3.097079e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 7.796861e-02
+  1 (restart 0) KSP residual norm 2.513945e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.224e-14)
+Wave port normalization: dot1_abs = 1.001040e-01, dot0_abs = 6.406439e-03, scale_magnitude = 3.160635e+00
+Wave port normalization: dot1_abs = 1.042643e-01, dot0_abs = 9.508685e-03, scale_magnitude = 3.096936e+00
+15 NLEPS (nconv=2, restart=0) residual norm 4.016309e-04
+Wave port normalization: dot1_abs = 1.001040e-01, dot0_abs = 6.406439e-03, scale_magnitude = 3.160635e+00
+Wave port normalization: dot1_abs = 1.042643e-01, dot0_abs = 9.508686e-03, scale_magnitude = 3.096936e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 4.918837e-02
+  1 (restart 0) KSP residual norm 2.112704e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 4.295e-14)
+Wave port normalization: dot1_abs = 1.001196e-01, dot0_abs = 6.407440e-03, scale_magnitude = 3.160388e+00
+Wave port normalization: dot1_abs = 1.042741e-01, dot0_abs = 9.509582e-03, scale_magnitude = 3.096790e+00
+16 NLEPS (nconv=2, restart=0) residual norm 2.779949e-04
+Wave port normalization: dot1_abs = 1.001196e-01, dot0_abs = 6.407440e-03, scale_magnitude = 3.160388e+00
+Wave port normalization: dot1_abs = 1.042741e-01, dot0_abs = 9.509582e-03, scale_magnitude = 3.096790e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 5.274811e-02
+  1 (restart 0) KSP residual norm 2.249421e-15
+GMRES solver converged in 1 iteration (avg. reduction factor: 4.264e-14)
+Wave port normalization: dot1_abs = 1.001135e-01, dot0_abs = 6.407044e-03, scale_magnitude = 3.160485e+00
+Wave port normalization: dot1_abs = 1.042702e-01, dot0_abs = 9.509228e-03, scale_magnitude = 3.096848e+00
+17 NLEPS (nconv=2, restart=0) residual norm 1.869971e-04
+Wave port normalization: dot1_abs = 1.001135e-01, dot0_abs = 6.407045e-03, scale_magnitude = 3.160485e+00
+Wave port normalization: dot1_abs = 1.042702e-01, dot0_abs = 9.509228e-03, scale_magnitude = 3.096848e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 9.361424e-03
+  1 (restart 0) KSP residual norm 3.564950e-16
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.808e-14)
+Wave port normalization: dot1_abs = 1.001059e-01, dot0_abs = 6.406558e-03, scale_magnitude = 3.160605e+00
+Wave port normalization: dot1_abs = 1.042654e-01, dot0_abs = 9.508792e-03, scale_magnitude = 3.096919e+00
+18 NLEPS (nconv=2, restart=0) residual norm 1.174822e-04
+Wave port normalization: dot1_abs = 1.001059e-01, dot0_abs = 6.406559e-03, scale_magnitude = 3.160605e+00
+Wave port normalization: dot1_abs = 1.042654e-01, dot0_abs = 9.508793e-03, scale_magnitude = 3.096919e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 2.103982e-02
+  1 (restart 0) KSP residual norm 7.532741e-16
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.580e-14)
+Wave port normalization: dot1_abs = 1.001043e-01, dot0_abs = 6.406458e-03, scale_magnitude = 3.160630e+00
+Wave port normalization: dot1_abs = 1.042645e-01, dot0_abs = 9.508702e-03, scale_magnitude = 3.096933e+00
+19 NLEPS (nconv=2, restart=0) residual norm 7.982157e-05
+Wave port normalization: dot1_abs = 1.001043e-01, dot0_abs = 6.406458e-03, scale_magnitude = 3.160630e+00
+Wave port normalization: dot1_abs = 1.042645e-01, dot0_abs = 9.508702e-03, scale_magnitude = 3.096933e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.199748e-02
+  1 (restart 0) KSP residual norm 4.216255e-16
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.514e-14)
+Wave port normalization: dot1_abs = 1.001065e-01, dot0_abs = 6.406599e-03, scale_magnitude = 3.160595e+00
+Wave port normalization: dot1_abs = 1.042658e-01, dot0_abs = 9.508828e-03, scale_magnitude = 3.096913e+00
+20 NLEPS (nconv=2, restart=0) residual norm 5.105154e-05
+Wave port normalization: dot1_abs = 1.001065e-01, dot0_abs = 6.406599e-03, scale_magnitude = 3.160595e+00
+Wave port normalization: dot1_abs = 1.042658e-01, dot0_abs = 9.508829e-03, scale_magnitude = 3.096913e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 4.079138e-03
+  1 (restart 0) KSP residual norm 1.532268e-16
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.756e-14)
+Wave port normalization: dot1_abs = 1.001084e-01, dot0_abs = 6.406718e-03, scale_magnitude = 3.160566e+00
+Wave port normalization: dot1_abs = 1.042670e-01, dot0_abs = 9.508935e-03, scale_magnitude = 3.096895e+00
+21 NLEPS (nconv=2, restart=0) residual norm 3.317346e-05
+Wave port normalization: dot1_abs = 1.001084e-01, dot0_abs = 6.406718e-03, scale_magnitude = 3.160566e+00
+Wave port normalization: dot1_abs = 1.042670e-01, dot0_abs = 9.508935e-03, scale_magnitude = 3.096895e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 6.626993e-03
+  1 (restart 0) KSP residual norm 2.549126e-16
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.847e-14)
+Wave port normalization: dot1_abs = 1.001081e-01, dot0_abs = 6.406704e-03, scale_magnitude = 3.160569e+00
+Wave port normalization: dot1_abs = 1.042669e-01, dot0_abs = 9.508923e-03, scale_magnitude = 3.096897e+00
+22 NLEPS (nconv=2, restart=0) residual norm 2.261514e-05
+Wave port normalization: dot1_abs = 1.001081e-01, dot0_abs = 6.406704e-03, scale_magnitude = 3.160569e+00
+Wave port normalization: dot1_abs = 1.042669e-01, dot0_abs = 9.508923e-03, scale_magnitude = 3.096897e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.861987e-03
+  1 (restart 0) KSP residual norm 6.046734e-17
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.247e-14)
+Wave port normalization: dot1_abs = 1.001073e-01, dot0_abs = 6.406647e-03, scale_magnitude = 3.160583e+00
+Wave port normalization: dot1_abs = 1.042663e-01, dot0_abs = 9.508872e-03, scale_magnitude = 3.096906e+00
+23 NLEPS (nconv=2, restart=0) residual norm 1.415824e-05
+Wave port normalization: dot1_abs = 1.001073e-01, dot0_abs = 6.406648e-03, scale_magnitude = 3.160583e+00
+Wave port normalization: dot1_abs = 1.042663e-01, dot0_abs = 9.508872e-03, scale_magnitude = 3.096906e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 2.147266e-03
+  1 (restart 0) KSP residual norm 1.040808e-16
+GMRES solver converged in 1 iteration (avg. reduction factor: 4.847e-14)
+Wave port normalization: dot1_abs = 1.001069e-01, dot0_abs = 6.406627e-03, scale_magnitude = 3.160588e+00
+Wave port normalization: dot1_abs = 1.042661e-01, dot0_abs = 9.508854e-03, scale_magnitude = 3.096909e+00
+24 NLEPS (nconv=2, restart=0) residual norm 9.556396e-06
+Wave port normalization: dot1_abs = 1.001069e-01, dot0_abs = 6.406627e-03, scale_magnitude = 3.160588e+00
+Wave port normalization: dot1_abs = 1.042661e-01, dot0_abs = 9.508854e-03, scale_magnitude = 3.096909e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 1.683536e-03
+  1 (restart 0) KSP residual norm 6.845374e-17
+GMRES solver converged in 1 iteration (avg. reduction factor: 4.066e-14)
+Wave port normalization: dot1_abs = 1.001072e-01, dot0_abs = 6.406641e-03, scale_magnitude = 3.160585e+00
+Wave port normalization: dot1_abs = 1.042663e-01, dot0_abs = 9.508866e-03, scale_magnitude = 3.096907e+00
+25 NLEPS (nconv=2, restart=0) residual norm 6.269772e-06
+Wave port normalization: dot1_abs = 1.001072e-01, dot0_abs = 6.406641e-03, scale_magnitude = 3.160585e+00
+Wave port normalization: dot1_abs = 1.042663e-01, dot0_abs = 9.508867e-03, scale_magnitude = 3.096907e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 3.048653e-04
+  1 (restart 0) KSP residual norm 1.219889e-17
+GMRES solver converged in 1 iteration (avg. reduction factor: 4.001e-14)
+Wave port normalization: dot1_abs = 1.001074e-01, dot0_abs = 6.406657e-03, scale_magnitude = 3.160581e+00
+Wave port normalization: dot1_abs = 1.042664e-01, dot0_abs = 9.508880e-03, scale_magnitude = 3.096904e+00
+26 NLEPS (nconv=2, restart=0) residual norm 3.976816e-06
+Wave port normalization: dot1_abs = 1.001074e-01, dot0_abs = 6.406657e-03, scale_magnitude = 3.160581e+00
+Wave port normalization: dot1_abs = 1.042664e-01, dot0_abs = 9.508881e-03, scale_magnitude = 3.096904e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 7.770998e-04
+  1 (restart 0) KSP residual norm 3.027634e-17
+GMRES solver converged in 1 iteration (avg. reduction factor: 3.896e-14)
+Wave port normalization: dot1_abs = 1.001074e-01, dot0_abs = 6.406658e-03, scale_magnitude = 3.160581e+00
+Wave port normalization: dot1_abs = 1.042664e-01, dot0_abs = 9.508881e-03, scale_magnitude = 3.096904e+00
+27 NLEPS (nconv=2, restart=0) residual norm 2.732541e-06
+Wave port normalization: dot1_abs = 1.001074e-01, dot0_abs = 6.406658e-03, scale_magnitude = 3.160581e+00
+Wave port normalization: dot1_abs = 1.042664e-01, dot0_abs = 9.508881e-03, scale_magnitude = 3.096904e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 3.226276e-04
+  1 (restart 0) KSP residual norm 1.316319e-17
+GMRES solver converged in 1 iteration (avg. reduction factor: 4.080e-14)
+Wave port normalization: dot1_abs = 1.001073e-01, dot0_abs = 6.406651e-03, scale_magnitude = 3.160582e+00
+Wave port normalization: dot1_abs = 1.042664e-01, dot0_abs = 9.508876e-03, scale_magnitude = 3.096905e+00
+28 NLEPS (nconv=2, restart=0) residual norm 1.724501e-06
+Wave port normalization: dot1_abs = 1.001073e-01, dot0_abs = 6.406652e-03, scale_magnitude = 3.160582e+00
+Wave port normalization: dot1_abs = 1.042664e-01, dot0_abs = 9.508876e-03, scale_magnitude = 3.096905e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 2.011318e-04
+  1 (restart 0) KSP residual norm 8.080111e-18
+GMRES solver converged in 1 iteration (avg. reduction factor: 4.017e-14)
+Wave port normalization: dot1_abs = 1.001073e-01, dot0_abs = 6.406648e-03, scale_magnitude = 3.160583e+00
+Wave port normalization: dot1_abs = 1.042663e-01, dot0_abs = 9.508873e-03, scale_magnitude = 3.096906e+00
+29 NLEPS (nconv=2, restart=0) residual norm 1.141477e-06
+Wave port normalization: dot1_abs = 1.001073e-01, dot0_abs = 6.406648e-03, scale_magnitude = 3.160583e+00
+Wave port normalization: dot1_abs = 1.042663e-01, dot0_abs = 9.508873e-03, scale_magnitude = 3.096906e+00
+  Residual norms for GMRES solve
+  0 (restart 0) KSP residual norm 2.208652e-04
+  1 (restart 0) KSP residual norm 9.817075e-18
+GMRES solver converged in 1 iteration (avg. reduction factor: 4.445e-14)
+Wave port normalization: dot1_abs = 1.001073e-01, dot0_abs = 6.406649e-03, scale_magnitude = 3.160583e+00
+Wave port normalization: dot1_abs = 1.042663e-01, dot0_abs = 9.508874e-03, scale_magnitude = 3.096905e+00
+30 NLEPS (nconv=2, restart=0) residual norm 7.654555e-07
+Eigenvalue 2, Quasi-Newton converged in 30 iterations (-1.495e+00+2.299e+01i).
+Wave port normalization: dot1_abs = 4.565636e-02, dot0_abs = 2.921908e-03, scale_magnitude = 4.680038e+00
+Wave port normalization: dot1_abs = 7.533726e-02, dot0_abs = 6.870602e-03, scale_magnitude = 3.643301e+00
+Wave port normalization: dot1_abs = 7.793256e-02, dot0_abs = 4.987515e-03, scale_magnitude = 3.582123e+00
+Wave port normalization: dot1_abs = 9.103299e-02, dot0_abs = 8.302020e-03, scale_magnitude = 3.314367e+00
+Wave port normalization: dot1_abs = 1.001073e-01, dot0_abs = 6.406649e-03, scale_magnitude = 3.160583e+00
+Wave port normalization: dot1_abs = 1.042663e-01, dot0_abs = 9.508874e-03, scale_magnitude = 3.096905e+00
+
+Computing solution error estimates and performing postprocessing
+
+Calculating boundary modes at wave ports for ω/2π = 4.233e+01 GHz (1.977e+01)
+Wave port normalization: dot1_abs = 4.565636e-02, dot0_abs = 2.921908e-03, scale_magnitude = 4.680038e+00
+ Port 1, mode 1: kₙ = 3.575e+01-1.901e-14i m⁻¹
+Wave port normalization: dot1_abs = 7.533726e-02, dot0_abs = 6.870602e-03, scale_magnitude = 3.643301e+00
+ Port 2, mode 1: kₙ = 6.649e+01-0.000e+00i m⁻¹
+
+Calculating boundary modes at wave ports for ω/2π = 4.541e+01 GHz (2.121e+01)
+Wave port normalization: dot1_abs = 7.793256e-02, dot0_abs = 4.987515e-03, scale_magnitude = 3.582123e+00
+ Port 1, mode 1: kₙ = 6.546e+01-0.000e+00i m⁻¹
+Wave port normalization: dot1_abs = 9.103299e-02, dot0_abs = 8.302020e-03, scale_magnitude = 3.314367e+00
+ Port 2, mode 1: kₙ = 8.619e+01+1.564e-14i m⁻¹
+
+Calculating boundary modes at wave ports for ω/2π = 4.923e+01 GHz (2.299e+01)
+Wave port normalization: dot1_abs = 1.001073e-01, dot0_abs = 6.406649e-03, scale_magnitude = 3.160583e+00
+ Port 1, mode 1: kₙ = 9.117e+01-7.971e-15i m⁻¹
+Wave port normalization: dot1_abs = 1.042663e-01, dot0_abs = 9.508874e-03, scale_magnitude = 3.096905e+00
+ Port 2, mode 1: kₙ = 1.070e+02-0.000e+00i m⁻¹
+
+     m,        Re{f} (GHz),        Im{f} (GHz),                  Q,      Error (Bkwd.),       Error (Abs.)
+     1,      +6.736753e+00,      +2.505676e-01,      +1.345228e+01,      +6.105622e-10,      +9.092826e-07
+ Wrote mode 1 to disk (Paraview)
+     2,      +7.227069e+00,      +3.915548e-01,      +9.242217e+00,      +4.730764e-10,      +7.060969e-07
+ Wrote mode 2 to disk (Paraview)
+     3,      +7.835682e+00,      +5.095599e-01,      +7.704916e+00,      +1.022951e-09,      +1.531345e-06
+ Wrote mode 3 to disk (Paraview)
+
+Completed 0 iterations of adaptive mesh refinement (AMR):
+ Indicator norm = 1.606e-02, global unknowns = 18128
+ Max. iterations = 0, tol. = 1.000e-02
+
+Estimated peak per-rank memory usage is: Min. 199.5M, Max. 237.7M, Avg. 216.2M, Total 864.8M
+Estimated peak per-node memory usage is: Min. 864.8M, Max. 864.8M, Avg. 864.8M, Total 864.8M
+
+Elapsed Time Report (s)           Min.        Max.        Avg.
+==============================================================
+Initialization                   0.008       0.011       0.010
+  Mesh Preprocessing             0.021       0.021       0.021
+Operator Construction            6.240       6.369       6.295
+  Wave Ports                     1.911       1.913       1.912
+Linear Solve                     0.332       0.360       0.346
+  Setup                          0.588       0.592       0.591
+  Preconditioner               140.722     140.751     140.737
+Eigenvalue Solve                 1.003       1.072       1.044
+Div.-Free Projection             0.156       0.285       0.229
+Estimation                       0.005       0.005       0.005
+  Construction                  10.108      10.182      10.137
+  Solve                          0.238       0.238       0.238
+Postprocessing                   6.667       6.692       6.673
+  Paraview                       0.655       0.680       0.674
+Disk IO                          0.016       0.018       0.016
+--------------------------------------------------------------
+Total                          169.207     169.237     169.229
+

@@ -297,7 +297,13 @@ void Normalize(const GridFunction &S0t, GridFunction &E0t, GridFunction &E0n,
       {sr * S0t.Real(), si * S0t.Real()},
       {-(sr * E0t.Real()) - (si * E0t.Imag()), -(sr * E0t.Imag()) + (si * E0t.Real())}};
   Mpi::GlobalSum(2, dot, S0t.ParFESpace()->GetComm());
-  auto scale = std::abs(dot[0]) / (dot[0] * std::sqrt(std::abs(dot[1])));
+  const double dot0_abs = std::abs(dot[0]);
+  const double dot1_abs = std::abs(dot[1]);
+  const double scale_mag = dot0_abs / (dot0_abs * std::sqrt(dot1_abs));
+  Mpi::Print("Wave port normalization: dot1_abs = {:.6e}, dot0_abs = {:.6e}, "
+             "scale_magnitude = {:.6e}\n",
+             dot1_abs, dot0_abs, scale_mag);
+  auto scale = dot0_abs / (dot[0] * std::sqrt(dot1_abs));
   ComplexVector::AXPBY(scale, E0t.Real(), E0t.Imag(), 0.0, E0t.Real(), E0t.Imag());
   ComplexVector::AXPBY(scale, E0n.Real(), E0n.Imag(), 0.0, E0n.Real(), E0n.Imag());
   ComplexVector::AXPBY(scale, sr, si, 0.0, sr, si);
